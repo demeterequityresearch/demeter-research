@@ -38,6 +38,14 @@ theme = "PaperMod"
     name = "분기 실적 분석"
     desc = "분기 실적을 직전 분기·전년 동기·컨센서스와 비교하고 앞선 리포트의 가설을 점검합니다."
 
+  # 회원 로그인·리포트 보관함 (Supabase 프로젝트 bfhkkaeyvdtmzpxxdlrc). key는 공개돼도 되는 publishable key.
+  # secret key는 절대 여기나 저장소에 넣지 않음 (리포트 올릴 때만 PC의 .secrets.env에서 읽음)
+  # 회원만 보는 곳: reports, companies 섹션 (layouts/_partials/member.html)
+  [params.supabase]
+    url = "https://bfhkkaeyvdtmzpxxdlrc.supabase.co"
+    key = "sb_publishable_ekB9Lp0c1a3OTNK5A5quVw_R8l-2y_Y"
+    bucket = "reports"
+
   # 면책 고지(모든 페이지 바닥글)는 data/disclaimer.json (원본 report_utils.DISCLAIMER_TEXT, scripts/publish.py가 옮김)
 
 # 상단 메뉴 (검색은 홈 화면 검색바)

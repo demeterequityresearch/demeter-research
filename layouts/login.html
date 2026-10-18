@@ -1,0 +1,172 @@
+{{- define "main" }}
+{{- /* /login/ : 로그인 · 가입 · 비밀번호 재설정 (Supabase, 이메일 + 비밀번호, 가입 시 이메일 인증)
+       ?next=<주소> 로 들어오면(회원만 보는 곳에서 보냄) 가입 화면을 먼저 보여 주고, 로그인 후 그 주소로 돌려보냄.
+       인증 메일·재설정 메일의 링크도 이 페이지로 돌아옴 (Supabase Redirect URLs에 등록된 주소) */ -}}
+<section class="view auth">
+  <div class="auth-card">
+    <p class="auth-note" id="auth-note" hidden>리포트는 회원만 볼 수 있습니다. 이메일로 가입하거나 로그인해 주세요.</p>
+    <h1 id="auth-title">로그인</h1>
+
+    <form id="auth-form" novalidate>
+      <label class="auth-field" id="f-email">
+        <span>이메일</span>
+        <input type="email" name="email" autocomplete="email" required>
+      </label>
+      <label class="auth-field" id="f-pass">
+        <span>비밀번호</span>
+        <input type="password" name="password" autocomplete="current-password" minlength="8" required>
+        <small id="pass-hint" hidden>8자 이상</small>
+      </label>
+      <label class="auth-check" id="f-agree" hidden>
+        <input type="checkbox" name="agree">
+        <span><a href="{{ "privacy/" | relLangURL }}" target="_blank" rel="noopener">개인정보처리방침</a>에 동의합니다 (필수)</span>
+      </label>
+      <p class="auth-msg" id="auth-msg" role="status" aria-live="polite" hidden></p>
+      <button type="submit" class="auth-btn" id="auth-btn">로그인</button>
+    </form>
+
+    <p class="auth-links" id="auth-links"></p>
+  </div>
+</section>
+
+<script>
+(function () {
+  // 인증·재설정 메일 링크로 돌아왔는지: supabase가 주소의 #부분을 지우기 전에 먼저 읽어 둠
+  var hash = new URLSearchParams(location.hash.slice(1));
+  var params = new URLSearchParams(location.search);
+  var next = params.get('next');
+  if (!next || next.charAt(0) !== '/' || next.charAt(1) === '/') next = null;  // 다른 사이트로 보내지 않음
+
+  var form = document.getElementById('auth-form');
+  var title = document.getElementById('auth-title');
+  var btn = document.getElementById('auth-btn');
+  var msg = document.getElementById('auth-msg');
+  var links = document.getElementById('auth-links');
+  var show = function (id, on) { document.getElementById(id).hidden = !on; };
+  var sb = null, mode = null, busy = false;
+
+  var MODES = {
+    login:  { title: '로그인', btn: '로그인', pass: true, agree: false,
+              links: [['signup', '처음이신가요? 이메일로 가입'], ['reset', '비밀번호를 잊으셨나요?']] },
+    signup: { title: '가입', btn: '가입하고 인증 메일 받기', pass: true, agree: true,
+              links: [['login', '이미 회원이신가요? 로그인']] },
+    reset:  { title: '비밀번호 재설정', btn: '재설정 메일 받기', pass: false, agree: false,
+              links: [['login', '로그인으로 돌아가기']] },
+    newpass:{ title: '새 비밀번호 설정', btn: '비밀번호 바꾸기', pass: true, agree: false, noEmail: true, links: [] }
+  };
+
+  function say(text, bad) {
+    msg.textContent = text;
+    msg.className = 'auth-msg' + (bad ? ' bad' : '');
+    msg.hidden = !text;
+  }
+
+  function setMode(m, keepMsg) {
+    mode = m;
+    var d = MODES[m];
+    title.textContent = d.title;
+    btn.textContent = d.btn;
+    show('f-email', !d.noEmail);
+    show('f-pass', d.pass);
+    show('f-agree', d.agree);
+    show('pass-hint', m === 'signup' || m === 'newpass');
+    form.password.autocomplete = (m === 'login') ? 'current-password' : 'new-password';
+    links.innerHTML = '';
+    d.links.forEach(function (l, i) {
+      if (i) links.appendChild(document.createTextNode(' · '));
+      var a = document.createElement('a');
+      a.href = '#'; a.textContent = l[1];
+      a.onclick = function (e) { e.preventDefault(); setMode(l[0]); };
+      links.appendChild(a);
+    });
+    if (!keepMsg) say('');
+  }
+
+  // Supabase 오류 문구 → 한국어
+  function ko(err) {
+    var m = (err && (err.message || err.error_description)) || '';
+    if (/Invalid login credentials/i.test(m)) return '이메일 또는 비밀번호가 맞지 않습니다.';
+    if (/Email not confirmed/i.test(m)) return '이메일 인증을 아직 마치지 않았습니다. 가입할 때 받은 메일의 링크를 눌러 주세요.';
+    if (/rate limit|too many/i.test(m)) return '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+    if (/at least|weak|short/i.test(m)) return '비밀번호는 8자 이상으로 정해 주세요.';
+    if (/invalid.*email|email.*invalid|unable to validate email/i.test(m)) return '이메일 주소를 확인해 주세요.';
+    if (/same.*password|different from the old/i.test(m)) return '지금 쓰는 비밀번호와 다른 비밀번호로 정해 주세요.';
+    if (/expired|invalid.*(link|token)|otp/i.test(m)) return '링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.';
+    return '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' + (m ? ' (' + m + ')' : '');
+  }
+
+  function goNext() { location.replace(next || window.DEMETER.home); }
+  function back() { return location.origin + window.DEMETER.login + (next ? '?next=' + encodeURIComponent(next) : ''); }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!sb || busy) return;
+    var email = form.email.value.trim(), pw = form.password.value;
+    var d = MODES[mode];
+    if (!d.noEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('이메일 주소를 확인해 주세요.', true);
+    if (d.pass && pw.length < 8) return say('비밀번호는 8자 이상으로 정해 주세요.', true);
+    if (d.agree && !form.agree.checked) return say('개인정보처리방침에 동의해 주세요.', true);
+
+    busy = true; btn.disabled = true; say('처리 중입니다…');
+    var job;
+    if (mode === 'login') {
+      job = sb.auth.signInWithPassword({ email: email, password: pw }).then(function (r) {
+        if (r.error) throw r.error;
+        goNext();
+      });
+    } else if (mode === 'signup') {
+      job = sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: back() } }).then(function (r) {
+        if (r.error) throw r.error;
+        form.reset();
+        say(email + ' 로 인증 메일을 보냈습니다. 메일의 링크를 누르면 가입이 끝납니다. 메일이 오지 않으면 스팸함을 확인하거나, 이미 가입한 주소라면 로그인해 주세요.');
+      });
+    } else if (mode === 'reset') {
+      job = sb.auth.resetPasswordForEmail(email, { redirectTo: back() }).then(function (r) {
+        if (r.error) throw r.error;
+        say(email + ' 로 비밀번호 재설정 메일을 보냈습니다. 가입한 주소라면 곧 도착합니다.');
+      });
+    } else if (mode === 'newpass') {
+      job = sb.auth.updateUser({ password: pw }).then(function (r) {
+        if (r.error) throw r.error;
+        say('비밀번호를 바꿨습니다. 잠시 후 이동합니다.');
+        setTimeout(goNext, 1200);
+      });
+    }
+    job.catch(function (err) { say(ko(err), true); })
+       .finally(function () { busy = false; btn.disabled = false; });
+  });
+
+  if (next) show('auth-note', true);
+  setMode(next ? 'signup' : 'login');
+
+  document.addEventListener('demeter:ready', function (e) {
+    sb = e.detail.sb;
+    var session = e.detail.session;
+    if (hash.get('error_description')) {
+      setMode('login', true);
+      return say(ko({ message: hash.get('error_description') }), true);
+    }
+    if (hash.get('type') === 'recovery' && session) {
+      show('auth-note', false);
+      setMode('newpass');
+      return form.password.focus();
+    }
+    if (hash.get('type') === 'signup' && session) {
+      show('auth-note', false);
+      setMode('login', true);
+      form.hidden = true;
+      say('이메일 인증이 끝났습니다. 가입을 환영합니다. 잠시 후 이동합니다.');
+      return setTimeout(goNext, 1500);
+    }
+    if (session) {
+      // 이미 로그인한 상태
+      show('auth-note', false);
+      form.hidden = true;
+      links.innerHTML = '';
+      say((session.user.email || '') + ' 로 로그인되어 있습니다.');
+      if (next) setTimeout(goNext, 800);
+    }
+  });
+})();
+</script>
+{{- end }}

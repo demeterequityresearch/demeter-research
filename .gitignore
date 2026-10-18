@@ -7,3 +7,9 @@ content/companies/
 
 # 비공개 초안 (Artifact 디자인 시안 등, 공개 저장소에 올리지 않음)
 _drafts/
+
+# 리포트 원본(PDF·docx)은 공개 저장소에 올리지 않음: Supabase 비공개 보관함에만 둠 (scripts/publish.py)
+reports/*.pdf
+reports/*.docx
+# Supabase secret key (리포트 올릴 때만 씀)
+.secrets.env

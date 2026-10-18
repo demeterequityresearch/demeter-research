@@ -1,5 +1,7 @@
 {{- define "main" }}
-{{- /* 리포트 한 편: 홈 / 회사 / 종류 경로, 제목, PDF 보기 + 다운로드 (본문은 scripts/convert.py가 만든 index.md) */ -}}
+{{- /* 리포트 한 편: 홈 / 회사 / 종류 경로, 제목(리포트 헤드라인), PDF 보기 + 다운로드 (회원만)
+       PDF는 Supabase 비공개 보관함에 있음(.Params.file). 열 때마다 다운로드 기록표(downloads)에 남긴 뒤 몇 분짜리 임시 주소로 엶.
+       보관함 규칙상 기록을 먼저 남겨야 열림 (supabase/setup.sql) */ -}}
 {{- $co := site.GetPage (printf "/companies/%s" (.Params.code | default "")) }}
 <article class="view report-page">
   <p class="crumb">
@@ -10,11 +12,62 @@
     {{- end }}
   </p>
   <header class="page-head">
+    {{- if .Params.headline }}
+    <p class="eyebrow">{{ .Title }}</p>
+    <h1>{{ .Params.headline }}</h1>
+    {{- with .Params.subhead }}<p class="report-sub">{{ . }}</p>{{ end }}
+    {{- else }}
     <h1>{{ .Title }}</h1>
+    {{- end }}
     <p class="r-date">{{ .Date.Format "2006-01-02" }}</p>
   </header>
-  <div class="report-body">
-    {{ .Content }}
+  {{- with .Params.file }}
+  <div class="report-viewer" id="viewer" data-file="{{ . }}"
+       data-name="{{ $.Date.Format "20060102" }}_{{ $.Params.company }}_{{ $.Title }}.pdf">
+    <p class="viewer-msg" id="viewer-msg">리포트를 불러오는 중입니다…</p>
   </div>
+  <p><button type="button" class="pdf-link" id="pdf-dl" hidden>PDF 다운로드</button></p>
+  <script>
+  (function () {
+    var box = document.getElementById('viewer');
+    var note = document.getElementById('viewer-msg');
+    var dl = document.getElementById('pdf-dl');
+    var file = box.dataset.file;
+
+    // 기록을 남기고(view/download) 임시 주소를 받음. 보관함 규칙상 순서가 바뀌면 열리지 않음
+    function open(sb, kind, opts) {
+      return sb.from('downloads').insert({ report: file, kind: kind }).then(function (r) {
+        if (r.error) throw r.error;
+        return sb.storage.from(window.DEMETER.bucket).createSignedUrl(file, kind === 'view' ? 600 : 60, opts);
+      }).then(function (r) {
+        if (r.error) throw r.error;
+        return r.data.signedUrl;
+      });
+    }
+
+    document.addEventListener('demeter:ready', function (e) {
+      var sb = e.detail.sb;
+      if (!e.detail.session) return;
+      open(sb, 'view').then(function (url) {
+        var f = document.createElement('iframe');
+        f.src = url;
+        f.title = 'PDF 리포트';
+        box.replaceChildren(f);
+        dl.hidden = false;
+      }).catch(function () {
+        note.textContent = '리포트를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';
+      });
+      dl.addEventListener('click', function () {
+        dl.disabled = true;
+        open(sb, 'download', { download: box.dataset.name }).then(function (url) {
+          location.href = url;
+        }).catch(function () {
+          alert('다운로드하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        }).finally(function () { dl.disabled = false; });
+      });
+    });
+  })();
+  </script>
+  {{- end }}
 </article>
 {{- end }}

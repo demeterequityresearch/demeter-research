@@ -1,0 +1,26 @@
+{{- /* 회원 로그인 (Supabase). 모든 페이지 <head>에 들어감 (extend_head.html)
+       - 회원만 보는 곳(reports·companies 섹션): 로그인 기록이 없으면 그 자리에서 로그인 페이지로 보냄 (아래 인라인 스크립트, 화면 깜빡임 방지)
+       - 실제 로그인 확인·상단 '로그인/로그아웃'·리포트 열람은 static/js/member.js */ -}}
+{{- $sb := site.Params.supabase }}
+{{- $gated := in (slice "reports" "companies") .Section }}
+{{- $ref := index (findRESubmatch `https://([^.]+)\.` $sb.url 1) 0 1 }}
+<script>
+window.DEMETER = {
+  url: {{ $sb.url }},
+  key: {{ $sb.key }},
+  bucket: {{ $sb.bucket }},
+  login: {{ "login/" | relURL }},
+  home: {{ "" | relURL }},
+  gated: {{ $gated }},
+  storageKey: {{ printf "sb-%s-auth-token" $ref }}
+};
+{{- if $gated }}
+(function () {
+  var has = false;
+  try { has = !!localStorage.getItem(window.DEMETER.storageKey); } catch (e) {}
+  if (!has) location.replace(window.DEMETER.login + '?next=' + encodeURIComponent(location.pathname + location.search + location.hash));
+})();
+{{- end }}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js" defer></script>
+<script src="{{ "js/member.js" | relURL }}" defer></script>
