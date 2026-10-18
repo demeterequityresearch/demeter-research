@@ -228,14 +228,20 @@ h3 {
 }
 
 /* ── 홈: 검색 ── */
+/* 첫 화면은 검색창이 차지하고, 바닥글 면책 고지는 맨 아래에 제목만 살짝 보이게 (화면 높이 - 상단 바 - 바닥글 보이는 부분) */
 .home {
-    padding-block: clamp(56px, 16vh, 160px) clamp(56px, 12vh, 120px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100svh - var(--home-peek, 170px));
+    padding-block: 48px 12vh;
 }
 
 .search {
     display: grid;
     grid-template-columns: minmax(0, 1fr);   /* 글자 크기를 키운 전화기에서도 화면 밖으로 안 나가게 */
     gap: 14px;
+    width: 100%;
     max-width: 640px;
     margin: 0 auto;
 }
