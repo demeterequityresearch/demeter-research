@@ -1,4 +1,4 @@
-baseURL = "https://demeterequityresearch-cpu.github.io/demeter-research/"
+baseURL = "https://demeterequityresearch.github.io/demeter-research/"
 languageCode = "ko-kr"
 title = "Demeter Equity Research"
 theme = "PaperMod"
@@ -24,7 +24,7 @@ theme = "PaperMod"
 
   [[params.socialIcons]]
     name = "github"
-    url = "https://github.com/demeterequityresearch-cpu"
+    url = "https://github.com/demeterequityresearch"
 
 # 상단 메뉴
 [menu]
