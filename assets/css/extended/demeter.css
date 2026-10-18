@@ -792,6 +792,7 @@ a.r-co:hover {
 }
 
 .series article {
+    position: relative;
     display: grid;
     align-content: start;
     gap: 8px;
@@ -816,6 +817,21 @@ a.r-co:hover {
 .series p {
     font-size: 14.5px;
     color: var(--muted);
+}
+
+/* 카드 어디를 눌러도 리포트 목록의 해당 종류로 (about.md의 card-link) */
+.series .card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.series article:hover {
+    border-color: var(--gold);
+}
+
+.series article:hover h3 {
+    color: var(--gold-text);
 }
 
 .series .status {

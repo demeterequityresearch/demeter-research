@@ -21,19 +21,19 @@ eyebrow: "About"
 <div class="series">
 <article>
 <span class="en">Business Overview</span>
-<h3>기업 분석</h3>
+<h3><a class="card-link" href="../reports/?type=BO">기업 분석</a></h3>
 <p>산업 구조와 시장 성장성, 경쟁 구도, 제품과 수주, 재무, Peer 대비 밸류에이션, 최근 주가 변동 요인을 정리합니다. 연 1회, 또는 대형 수주·인수합병·사업 구조 변경처럼 사업에 중대한 변화가 있을 때 개정합니다.</p>
 <span class="status">발간 중</span>
 </article>
 <article>
 <span class="en">Weekly Update</span>
-<h3>주간 업데이트</h3>
+<h3><a class="card-link" href="../reports/?type=WU">주간 업데이트</a></h3>
 <p>한 주의 시세와 기술적 지표, 공시와 보도, 핵심 모니터링 지표의 변화를 짚고 다음 주 확인할 일을 남깁니다.</p>
 <span class="status">준비 중</span>
 </article>
 <article>
 <span class="en">Quarterly Performance Review</span>
-<h3>분기 실적 리뷰</h3>
+<h3><a class="card-link" href="../reports/?type=QR">분기 실적 리뷰</a></h3>
 <p>분기 실적을 직전 분기·전년 동기와 컨센서스에 비교하고, 앞선 리포트의 가설이 맞았는지 점검합니다.</p>
 <span class="status">준비 중</span>
 </article>

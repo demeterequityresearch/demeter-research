@@ -1,5 +1,5 @@
 {{- define "main" }}
-{{- /* /reports/ : 모든 리포트 (종류별 거르기) */ -}}
+{{- /* /reports/ : 모든 리포트 (종류별 거르기). /reports/?type=BO 처럼 들어오면 그 종류만 (소개 페이지 카드가 이렇게 연결) */ -}}
 {{- $reports := (where site.RegularPages "Section" "reports").ByDate.Reverse }}
 <div class="view">
   <div class="page-head">
@@ -24,14 +24,23 @@
 (function () {
   var rows = document.querySelectorAll('#all-list .row');
   var empty = document.getElementById('all-empty');
-  document.querySelector('.filters').addEventListener('click', function (e) {
-    var b = e.target.closest('button[data-f]');
-    if (!b) return;
+  function pick(b) {
     document.querySelectorAll('.filters button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
     var shown = 0;
     rows.forEach(function (r) { var on = b.dataset.f === 'all' || r.dataset.type === b.dataset.f; r.hidden = !on; if (on) shown++; });
     empty.hidden = shown > 0;
+  }
+  document.querySelector('.filters').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-f]');
+    if (!b) return;
+    pick(b);
+    var u = new URL(location.href);
+    if (b.dataset.f === 'all') u.searchParams.delete('type'); else u.searchParams.set('type', b.dataset.f);
+    history.replaceState(null, '', u);
   });
+  var t = (new URLSearchParams(location.search).get('type') || '').toUpperCase();
+  var start = t && document.querySelector('.filters button[data-f="' + t.replace(/[^A-Z]/g, '') + '"]');
+  if (start) pick(start);
 })();
 </script>
 {{- end }}
