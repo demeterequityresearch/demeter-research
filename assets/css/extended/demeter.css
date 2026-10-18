@@ -222,6 +222,7 @@ h3 {
 
 .search {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);   /* 글자 크기를 키운 전화기에서도 화면 밖으로 안 나가게 */
     gap: 14px;
     max-width: 640px;
     margin: 0 auto;
@@ -258,6 +259,7 @@ h3 {
 
 .search-field input {
     flex: 1;
+    width: 0;               /* 입력칸 기본 너비(글자 수 기준)를 없애고 남는 폭만 씀 */
     min-width: 0;
     border: 0;
     outline: 0;
@@ -273,6 +275,25 @@ h3 {
 
 .search-field input::placeholder {
     color: var(--muted);
+}
+
+.search-btn {
+    flex: none;
+    margin-right: -10px;
+    padding: 8px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--band);
+    color: var(--band-ink);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.search-btn:hover,
+.search-btn:focus-visible {
+    background: var(--gold);
+    color: #fff;
 }
 
 .suggest {
@@ -328,13 +349,6 @@ h3 {
 .search-hint {
     text-align: center;
     font-size: 13.5px;
-    color: var(--muted);
-}
-
-.coverage-label {
-    margin-top: 28px;
-    text-align: center;
-    font-size: 12.5px;
     color: var(--muted);
 }
 

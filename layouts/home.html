@@ -1,7 +1,5 @@
 {{- define "main" }}
 {{- /* 홈: 구글식 검색바(회사명·종목코드) → 회사 페이지로 이동. 회사 목록은 index.json, 면책 고지는 바닥글 */ -}}
-{{- $companies := slice }}
-{{- with site.GetPage "/companies" }}{{ $companies = .Sections.ByTitle }}{{ end }}
 
 <section class="home">
   <form class="search" id="search-form" role="search" autocomplete="off">
@@ -12,22 +10,12 @@
         <span class="sr-only">회사명 또는 종목코드</span>
         <input id="q" type="search" placeholder="회사명 또는 종목코드 검색" maxlength="64" autofocus
           role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+        <button class="search-btn" type="submit">검색</button>
       </label>
       <ul class="suggest" id="suggest" role="listbox" aria-label="검색 결과" hidden></ul>
     </div>
-    {{- with index $companies 0 }}
-    <p class="search-hint">예: {{ .Title }}, {{ .Params.code }}</p>
-    {{- end }}
+    <p class="search-hint">예: 삼성전자, 005930</p>
   </form>
-
-  {{- with $companies }}
-  <p class="coverage-label">리포트가 있는 기업</p>
-  <div class="coverage">
-    {{- range . }}
-    <a href="{{ .RelPermalink }}">{{ .Title }}<small>{{ .Params.code }}</small></a>
-    {{- end }}
-  </div>
-  {{- end }}
 </section>
 
 <script>
