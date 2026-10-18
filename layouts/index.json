@@ -1,0 +1,12 @@
+{{- /* 홈 검색바가 쓰는 검색 색인: 리포트별 제목·회사명·종목코드·날짜 */ -}}
+{{- $index := slice -}}
+{{- range where site.RegularPages "Section" "reports" -}}
+    {{- $index = $index | append (dict
+        "title" .Title
+        "company" (.Params.company | default "")
+        "code" (.Params.code | default "")
+        "date" (.Date.Format "2006-01-02")
+        "permalink" .RelPermalink
+        "summary" (.Summary | plainify | truncate 120)) -}}
+{{- end -}}
+{{- $index | jsonify -}}

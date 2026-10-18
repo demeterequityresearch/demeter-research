@@ -1,6 +1,8 @@
 """reports/ 폴더의 .docx / .pdf 를 Hugo 페이지로 변환합니다.
 
 파일명 규칙: 2026-10-18_삼성전자.docx  ->  날짜 2026-10-18, 제목 '삼성전자'
+종목코드를 넣으면 검색에 쓰입니다: 2026-10-18_코세스_089890_사업 개요.pdf
+  ->  회사명 '코세스', 종목코드 '089890', 제목 '코세스 사업 개요'
 같은 이름의 docx와 pdf가 함께 있으면 본문은 docx, PDF는 다운로드 링크로 붙습니다.
 """
 import pathlib, re, shutil, subprocess
@@ -19,7 +21,18 @@ for f in SRC.iterdir():
 
 for stem, files in sorted(groups.items()):
     m = re.match(r"(\d{4}-\d{2}-\d{2})_(.+)", stem)
-    date, title = (m.group(1), m.group(2)) if m else (None, stem)
+    date, rest = (m.group(1), m.group(2)) if m else (None, stem)
+
+    # '_'로 나눈 조각 중 6자리 종목코드(예: 089890, 0001A0)를 찾고, 그 앞 조각을 회사명으로 봅니다
+    parts = [p.strip() for p in rest.split("_") if p.strip()]
+    code = company = None
+    for i, p in enumerate(parts):
+        if re.fullmatch(r"\d[0-9A-Z]{4}\d", p):
+            code = p
+            company = parts[i - 1] if i > 0 else None
+            parts.pop(i)
+            break
+    title = " ".join(parts) or rest
 
     bundle = DST / stem
     shutil.rmtree(bundle, ignore_errors=True)
@@ -28,6 +41,10 @@ for stem, files in sorted(groups.items()):
     front = f'---\ntitle: "{title}"\n'
     if date:
         front += f"date: {date}\n"
+    if company:
+        front += f'company: "{company}"\n'
+    if code:
+        front += f'code: "{code}"\n'
     front += "---\n\n"
 
     body = ""
