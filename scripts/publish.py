@@ -10,7 +10,7 @@ PDF는 공개 저장소에 두지 않습니다(회원만 열람·다운로드, 2
 사용법 (웹사이트 폴더에서):
   python scripts/publish.py --list            올릴 수 있는 최종본 목록
   python scripts/publish.py 코세스             코세스의 모든 종류 최종본
-  python scripts/publish.py 089890 --type BO  종목코드 + 종류(BO/WR/QR) 지정
+  python scripts/publish.py 089890 --type BO  종목코드 + 종류(BO/WU/QR) 지정
   python scripts/publish.py --all             모든 기업의 최종본
   python scripts/publish.py --disclaimer      면책 문구만 다시 가져오기
 올린 뒤 git commit & push 하면 사이트에 반영됩니다.
@@ -28,7 +28,7 @@ SITE = pathlib.Path(__file__).resolve().parent.parent
 STOCK = SITE.parent / "Stock analysis reports"
 DEST = SITE / "reports"
 SECRETS = SITE / ".secrets.env"
-CODES = {"business_overview": "BO", "weekly_monitoring": "WR", "quarterly_review": "QR"}
+CODES = {"business_overview": "BO", "weekly_update": "WU", "quarterly_review": "QR"}
 
 sys.path.insert(0, str(SITE / "scripts"))
 from convert import parse  # noqa: E402  표준 파일명 -> 페이지 주소·보관함 파일 이름 (convert.py 한 곳에서 정함)
@@ -119,7 +119,7 @@ def candidates(name, code, prof, types):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("company", nargs="?", help="회사명 또는 종목코드")
-    ap.add_argument("--type", action="append", choices=list(CODES.values()), help="BO / WR / QR (여러 번 가능)")
+    ap.add_argument("--type", action="append", choices=list(CODES.values()), help="BO / WU / QR (여러 번 가능)")
     ap.add_argument("--all", action="store_true", help="모든 기업")
     ap.add_argument("--list", action="store_true", help="목록만 보기")
     ap.add_argument("--disclaimer", action="store_true", help="면책 문구만 다시 가져오기")
