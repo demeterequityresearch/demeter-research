@@ -539,20 +539,6 @@ a.r-co:hover {
     font-size: 17px;
 }
 
-.pdf-link {
-    font-size: 12.5px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    color: var(--gold-text);
-    border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
-    border-radius: 999px;
-    padding: 2px 12px;
-}
-
-.pdf-link:hover {
-    background: var(--chip);
-}
-
 /* ── 리포트 페이지 거르기 ── */
 .filters {
     display: flex;
@@ -583,13 +569,19 @@ a.r-co:hover {
     margin-bottom: 24px;
 }
 
-/* 리포트 보기 (회원만, PDF는 Supabase 보관함의 임시 주소) */
-.report-viewer iframe {
+/* 리포트 보기 (회원만, PDF는 Supabase 보관함 → pdf.js로 페이지마다 그림) */
+.report-viewer {
+    display: grid;
+    gap: 14px;
+}
+
+.report-viewer canvas {
     display: block;
     width: 100%;
-    height: min(900px, 80vh);
+    height: auto;
+    background: #fff;
     border: 1px solid var(--rule);
-    background: var(--surface);
+    box-shadow: 0 1px 6px color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
 .viewer-msg {
@@ -600,16 +592,12 @@ a.r-co:hover {
     border: 1px solid var(--rule);
 }
 
-button.pdf-link {
-    margin-top: 16px;
-    background: none;
-    font: inherit;
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
+/* ── 로그인 · 가입 ── */
+/* 화면 전환(로그인/가입/재설정)은 hidden 속성으로 함: 아래 display 지정보다 앞서게 */
+.auth [hidden] {
+    display: none !important;
 }
 
-/* ── 로그인 · 가입 ── */
 .auth {
     display: flex;
     justify-content: center;
@@ -1000,4 +988,13 @@ button.pdf-link {
 .foot-line a {
     text-decoration: underline;
     text-underline-offset: 3px;
+}
+
+/* 가입 완료 후 '시작하기' 버튼 (링크를 버튼 모양으로) */
+.auth-links .auth-go {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--band-ink);
+    text-decoration: none;
 }

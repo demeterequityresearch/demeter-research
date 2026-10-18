@@ -39,4 +39,4 @@ url: "/privacy/"
 ## 6. 개인정보 보호 책임자와 연락처
 
 - 책임자: Demeter Equity Research 운영자
-- 연락처: (연락처 이메일)
+- 연락처: demeter.equityresearch@gmail.com

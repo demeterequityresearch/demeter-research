@@ -21,9 +21,10 @@
         <input type="checkbox" name="agree">
         <span><a href="{{ "privacy/" | relLangURL }}" target="_blank" rel="noopener">개인정보처리방침</a>에 동의합니다 (필수)</span>
       </label>
-      <p class="auth-msg" id="auth-msg" role="status" aria-live="polite" hidden></p>
       <button type="submit" class="auth-btn" id="auth-btn">로그인</button>
     </form>
+
+    <p class="auth-msg" id="auth-msg" role="status" aria-live="polite" hidden></p>
 
     <p class="auth-links" id="auth-links"></p>
   </div>
@@ -155,8 +156,14 @@
       show('auth-note', false);
       setMode('login', true);
       form.hidden = true;
-      say('이메일 인증이 끝났습니다. 가입을 환영합니다. 잠시 후 이동합니다.');
-      return setTimeout(goNext, 1500);
+      title.textContent = '가입을 환영합니다';
+      say('이메일 인증이 끝났습니다. 이제 리포트를 보고 내려받을 수 있습니다.');
+      links.innerHTML = '';
+      var go = document.createElement('a');
+      go.href = next || window.DEMETER.home;
+      go.className = 'auth-btn auth-go';
+      go.textContent = next ? '보려던 페이지로 가기' : '시작하기';
+      return links.appendChild(go);
     }
     if (session) {
       // 이미 로그인한 상태
