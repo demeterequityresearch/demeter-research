@@ -1,0 +1,4 @@
+public/
+resources/
+content/reports/
+.hugo_build.lock

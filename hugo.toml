@@ -1,0 +1,42 @@
+baseURL = "https://demeterequityresearch-cpu.github.io/demeter-research/"
+languageCode = "ko-kr"
+title = "Demeter Equity Research"
+theme = "PaperMod"
+
+# 마크다운 안의 HTML(iframe 등) 허용 — PDF 임베드에 필요
+[markup.goldmark.renderer]
+  unsafe = true
+
+# 검색 기능용 인덱스
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[params]
+  ShowReadingTime = true
+  ShowToc = true
+  ShowPostNavLinks = true
+  mainSections = ["reports"]
+
+  # 홈 상단 소개 박스 (그 아래에 최신 리포트 목록이 자동으로 나옵니다)
+  [params.homeInfoParams]
+    Title = "Demeter Equity Research"
+    Content = "Demeter Equity Research에서 작성한 개별 종목·산업 분석 리포트를 공유합니다. 본 자료는 투자 권유가 아니며, 투자 판단의 책임은 투자자 본인에게 있습니다."
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/demeterequityresearch-cpu"
+
+# 상단 메뉴
+[menu]
+  [[menu.main]]
+    name = "리포트"
+    pageRef = "/reports"
+    weight = 1
+  [[menu.main]]
+    name = "검색"
+    pageRef = "/search"
+    weight = 2
+  [[menu.main]]
+    name = "소개"
+    pageRef = "/about"
+    weight = 3
