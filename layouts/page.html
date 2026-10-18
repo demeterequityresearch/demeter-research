@@ -1,0 +1,13 @@
+{{- define "main" }}
+{{- /* 일반 페이지(소개, 리서치 방법): 영문 소제목 · 제목 · 한 줄 설명 · 본문 */ -}}
+<article class="view">
+  <header class="page-head">
+    {{- with .Params.eyebrow }}<span class="eyebrow">{{ . }}</span>{{ end }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Description }}<p>{{ . }}</p>{{ end }}
+  </header>
+  <div class="page-body">
+    {{ .Content }}
+  </div>
+</article>
+{{- end }}

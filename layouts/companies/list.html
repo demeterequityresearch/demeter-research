@@ -1,0 +1,40 @@
+{{- define "main" }}
+{{- /* /companies/<종목코드>/ : 회사 페이지 (기업 기본 분석 / 주간 업데이트 / 분기 실적 분석 세 칸에 리포트 목록)
+       /companies/ : 회사 목록. 페이지 원본은 scripts/convert.py가 리포트에서 만든다 */ -}}
+{{- if .Params.code }}
+{{- $code := .Params.code }}
+{{- $reports := where (where site.RegularPages "Section" "reports") "Params.code" $code }}
+<div class="view">
+  <p class="crumb"><a href="{{ "" | relLangURL }}">홈</a> / {{ .Title }}</p>
+  <div class="co-head">
+    <h1>{{ .Title }}</h1><span class="co-code">{{ $code }}</span>
+    <p class="co-meta">리포트 {{ len $reports }}건{{ with $reports.ByDate.Reverse }} · 최근 발간 {{ (index . 0).Date.Format "2006-01-02" }}{{ end }}</p>
+  </div>
+  <div class="co-sections">
+    {{- range site.Params.reportTypes }}
+    {{- $rs := (where $reports "Params.reportType" .key).ByDate.Reverse }}
+    <section class="co-sec" aria-labelledby="sec-{{ .key | lower }}">
+      <h2 id="sec-{{ .key | lower }}">{{ .name }}<span class="n">{{ len $rs }}건</span></h2>
+      <p class="co-desc">{{ .desc }}</p>
+      {{- if $rs }}
+      <ul class="report-list">
+        {{- range $rs }}{{ partial "report-row.html" (dict "page" . "withCompany" false) }}{{ end }}
+      </ul>
+      {{- else }}
+      <p class="co-empty">아직 발간된 {{ .name }} 리포트가 없습니다.</p>
+      {{- end }}
+    </section>
+    {{- end }}
+  </div>
+</div>
+{{- else }}
+<div class="view">
+  <div class="page-head"><h1>기업</h1><p>리포트가 있는 기업입니다.</p></div>
+  <div class="coverage start">
+    {{- range .Sections.ByTitle }}
+    <a href="{{ .RelPermalink }}">{{ .Title }}<small>{{ .Params.code }}</small></a>
+    {{- end }}
+  </div>
+</div>
+{{- end }}
+{{- end }}

@@ -1,86 +1,92 @@
 {{- define "main" }}
-{{- /* 홈: 가운데 검색바(회사명·종목코드) + 아래 국문/영문 면책 고지 */ -}}
+{{- /* 홈: 구글식 검색바(회사명·종목코드) → 회사 페이지로 이동. 회사 목록은 index.json, 면책 고지는 바닥글 */ -}}
+{{- $companies := slice }}
+{{- with site.GetPage "/companies" }}{{ $companies = .Sections.ByTitle }}{{ end }}
 
-<section class="home-search">
-  <form class="hs-box" role="search" autocomplete="off" onsubmit="return false">
-    <svg class="hs-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="8"></circle>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-    <input id="hs-input" type="search" placeholder="회사명 또는 종목코드 검색" aria-label="회사명 또는 종목코드 검색"
-      aria-controls="hs-results" maxlength="64" autofocus>
+<section class="home">
+  <form class="search" id="search-form" role="search" autocomplete="off">
+    <h1 class="sr-only">기업 검색</h1>
+    <div class="search-box">
+      <label class="search-field" for="q">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <span class="sr-only">회사명 또는 종목코드</span>
+        <input id="q" type="search" placeholder="회사명 또는 종목코드 검색" maxlength="64" autofocus
+          role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+      </label>
+      <ul class="suggest" id="suggest" role="listbox" aria-label="검색 결과" hidden></ul>
+    </div>
+    {{- with index $companies 0 }}
+    <p class="search-hint">예: {{ .Title }}, {{ .Params.code }}</p>
+    {{- end }}
   </form>
-  <ul id="hs-results" class="hs-results" role="listbox" hidden></ul>
-  <p class="hs-hint">예: 삼성전자, 005930 · <a href="{{ "reports/" | relLangURL }}">전체 리포트 보기</a></p>
-</section>
 
-<section class="home-disclaimer" aria-labelledby="disclaimer-title">
-  <h2 id="disclaimer-title">Disclaimer</h2>
-  {{- range site.Params.disclaimer.ko }}
-  <p>{{ . }}</p>
-  {{- end }}
-  {{- range site.Params.disclaimer.en }}
-  <p lang="en">{{ . }}</p>
+  {{- with $companies }}
+  <p class="coverage-label">리포트가 있는 기업</p>
+  <div class="coverage">
+    {{- range . }}
+    <a href="{{ .RelPermalink }}">{{ .Title }}<small>{{ .Params.code }}</small></a>
+    {{- end }}
+  </div>
   {{- end }}
 </section>
 
-{{- $fuse := resources.Get "js/fuse.basic.min.js" | fingerprint }}
-<script src="{{ $fuse.RelPermalink }}" integrity="{{ $fuse.Data.Integrity }}"></script>
 <script>
 (function () {
-  var input = document.getElementById('hs-input');
-  var list = document.getElementById('hs-results');
-  var fuse = null, items = [], active = -1;
+  var q = document.getElementById('q');
+  var sug = document.getElementById('suggest');
+  var companies = [], matches = [], active = -1;
 
   fetch({{ "index.json" | relLangURL }})
     .then(function (r) { return r.json(); })
-    .then(function (data) {
-      fuse = new Fuse(data, {
-        keys: [{ name: 'company', weight: 3 }, { name: 'code', weight: 3 }, { name: 'title', weight: 2 }],
-        threshold: 0.3, ignoreLocation: true
-      });
-      if (input.value) render();
-    });
+    .then(function (data) { companies = data; if (q.value.trim()) show(); });
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
+  function norm(s) { return String(s).toLowerCase().replace(/\s+/g, ''); }
+  function close() { sug.hidden = true; q.setAttribute('aria-expanded', 'false'); }
 
-  function render() {
-    var q = input.value.trim();
-    active = -1;
-    if (!q || !fuse) { items = []; list.hidden = true; list.innerHTML = ''; return; }
-    items = fuse.search(q, { limit: 8 }).map(function (r) { return r.item; });
-    if (!items.length) {
-      list.innerHTML = '<li class="hs-empty">검색 결과가 없습니다</li>';
-    } else {
-      list.innerHTML = items.map(function (it, i) {
-        var tag = it.code ? '<span class="hs-code">' + esc(it.code) + '</span>' : '';
-        return '<li role="option" id="hs-opt-' + i + '"><a href="' + esc(it.permalink) + '">' +
-          '<span class="hs-title">' + esc(it.title) + '</span>' + tag +
-          '<span class="hs-date">' + esc(it.date) + '</span></a></li>';
-      }).join('');
-    }
-    list.hidden = false;
+  // 회사명 일부 또는 종목코드 앞자리로 찾음 (리포트가 있는 회사만)
+  function show() {
+    var t = norm(q.value);
+    if (!t) { matches = []; close(); return; }
+    matches = companies.filter(function (c) { return norm(c.name).indexOf(t) >= 0 || c.code.indexOf(t) === 0; });
+    active = matches.length ? 0 : -1;
+    sug.innerHTML = matches.length
+      ? matches.map(function (c, i) {
+          return '<li role="option" id="opt-' + c.code + '" aria-selected="' + (i === active) + '" data-href="' + esc(c.permalink) + '">' +
+            '<span>' + esc(c.name) + '</span><span class="s-code">' + esc(c.code) + '</span>' +
+            '<span class="s-count">리포트 ' + c.count + '건</span></li>';
+        }).join('')
+      : '<li class="s-none" role="option" aria-disabled="true">‘' + esc(q.value.trim()) + '’에 맞는 기업이 없습니다. 리포트가 있는 기업만 검색됩니다.</li>';
+    sug.hidden = false;
+    q.setAttribute('aria-expanded', 'true');
+    q.setAttribute('aria-activedescendant', active >= 0 ? 'opt-' + matches[active].code : '');
   }
-
   function move(d) {
-    var opts = list.querySelectorAll('li[role=option]');
-    if (!opts.length) return;
-    if (active >= 0) opts[active].classList.remove('active');
-    active = (active + d + opts.length) % opts.length;
-    opts[active].classList.add('active');
-    input.setAttribute('aria-activedescendant', opts[active].id);
+    if (!matches.length) return;
+    active = (active + d + matches.length) % matches.length;
+    sug.querySelectorAll('[role=option]').forEach(function (li, i) { li.setAttribute('aria-selected', String(i === active)); });
+    q.setAttribute('aria-activedescendant', 'opt-' + matches[active].code);
   }
 
-  input.addEventListener('input', render);
-  input.addEventListener('keydown', function (e) {
+  q.addEventListener('input', show);
+  q.addEventListener('focus', function () { if (q.value.trim()) show(); });
+  q.addEventListener('blur', function () { setTimeout(close, 120); });
+  q.addEventListener('keydown', function (e) {
     if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
-    else if (e.key === 'Enter' && items.length) {
-      location.href = items[active >= 0 ? active : 0].permalink;
-    } else if (e.key === 'Escape') { input.value = ''; render(); }
+    else if (e.key === 'Escape') { close(); }
+  });
+  document.getElementById('search-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!q.value.trim()) return;
+    show();
+    if (matches.length) location.href = matches[Math.max(active, 0)].permalink;
+  });
+  sug.addEventListener('mousedown', function (e) {
+    var li = e.target.closest('li[data-href]');
+    if (li) { e.preventDefault(); location.href = li.dataset.href; }
   });
 })();
 </script>

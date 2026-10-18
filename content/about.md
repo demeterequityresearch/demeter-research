@@ -1,20 +1,40 @@
 ---
-title: "소개"
+title: "Demeter Equity Research"
+linkTitle: "소개"
+eyebrow: "About"
 ---
 
-## Demeter Equity Research
+<div class="about-grid">
+<div class="about-text">
+<p>Demeter Equity Research는 코스닥 상장 기업을 중심으로, 필요하면 유가증권시장 기업까지 다루는 기업 분석 리서치입니다.</p>
+<p>금융감독원 전자공시(DART)의 사업보고서와 수시 공시, 한국거래소 시세, 관세청 수출입 통계 같은 공공 데이터를 먼저 읽고, 그 위에 산업 자료와 언론 보도를 더합니다. 한 기업을 처음 다룰 때 기업 기본 분석을 쓰고, 이후 분기 실적과 주간 흐름을 이어서 추적합니다.</p>
+<p>리포트는 앞선 리포트가 남긴 확인 항목을 다음 리포트가 점검하는 방식으로 이어집니다. 무엇이 확인됐고 무엇이 아직 남았는지를 독자가 따라갈 수 있게 하기 위해서입니다.</p>
+</div>
+<dl class="facts-list">
+<div><dt>커버리지</dt><dd>코스닥 상장사 중심 (필요 시 유가증권시장)</dd></div>
+<div><dt>주요 원천</dt><dd>DART 공시, KRX 시세, 관세청 HS 코드별 수출입, KOSIS·ECOS 통계</dd></div>
+<div><dt>표기 단위</dt><dd>국내 기업 실적은 억원, 글로벌 시장은 달러. 표마다 단위와 기준 시점 표기</dd></div>
+<div><dt>제시하지 않는 것</dt><dd>목표주가, 매수·매도 투자의견</dd></div>
+</dl>
+</div>
 
-Demeter Equity Research는 개별 종목과 산업에 대한 독립적인 분석 리포트를 작성·공유합니다.
-기업의 사업 구조, 재무제표, 밸류에이션을 중심으로 장기적인 관점에서 기업 가치를 살펴봅니다.
-
-## 리포트 구성
-
-- **기업 분석** : 사업 모델, 경쟁력, 실적 추이와 전망
-- **산업 분석** : 업황, 주요 플레이어, 구조적 변화
-- **밸류에이션** : 적정 가치 산정과 핵심 가정
-
-## 면책 고지
-
-본 사이트의 모든 자료는 정보 제공을 목적으로 작성되었으며, 특정 종목의 매수·매도를 권유하지 않습니다.
-자료에 포함된 의견과 추정은 작성 시점의 판단이며 사전 예고 없이 변경될 수 있습니다.
-투자 판단과 그 결과에 대한 책임은 투자자 본인에게 있습니다.
+<div class="series">
+<article>
+<span class="en">Business Overview</span>
+<h3>기업 기본 분석</h3>
+<p>산업 구조와 시장 성장성, 경쟁 구도, 제품과 수주, 재무, Peer 대비 밸류에이션, 최근 주가 변동 요인을 정리합니다.</p>
+<span class="status">발간 중</span>
+</article>
+<article>
+<span class="en">Weekly Update</span>
+<h3>주간 업데이트</h3>
+<p>한 주의 시세와 기술적 지표, 공시와 보도, 핵심 모니터링 지표의 변화를 짚고 다음 주 확인할 일을 남깁니다.</p>
+<span class="status">발간 중</span>
+</article>
+<article>
+<span class="en">Quarterly Review</span>
+<h3>분기 실적 분석</h3>
+<p>분기 실적을 직전 분기·전년 동기와 컨센서스에 비교하고, 앞선 리포트의 가설이 맞았는지 점검합니다.</p>
+<span class="status">준비 중</span>
+</article>
+</div>

@@ -8,13 +8,36 @@ docx·초안·수정본(_수정, _검토 등)은 가져오지 않고, 최종본�
   python scripts/publish.py 코세스             코세스의 모든 종류 최종본
   python scripts/publish.py 089890 --type BO  종목코드 + 종류(BO/WR/QR) 지정
   python scripts/publish.py --all             모든 기업의 최종본
+  python scripts/publish.py --disclaimer      면책 문구만 다시 가져오기
 복사 후 git commit & push 하면 사이트에 반영됩니다.
-"""
-import argparse, json, pathlib, re, shutil, sys
 
-STOCK = pathlib.Path.home() / "Documents" / "Stock analysis reports"
-DEST = pathlib.Path(__file__).resolve().parent.parent / "reports"
+면책 문구는 리포트와 한 벌이다: 원본은 Stock analysis reports/shared/report_utils.py의 DISCLAIMER_TEXT이고,
+복사할 때마다(또는 --disclaimer) data/disclaimer.json으로 옮겨 홈 화면(layouts/home.html)이 읽는다.
+"""
+import argparse, ast, json, pathlib, re, shutil, sys
+
+# 리포트 폴더는 이 웹사이트 폴더의 옆 폴더 (둘 다 Documents/Demeter Equity Research 아래)
+SITE = pathlib.Path(__file__).resolve().parent.parent
+STOCK = SITE.parent / "Stock analysis reports"
+DEST = SITE / "reports"
 CODES = {"business_overview": "BO", "weekly_monitoring": "WR", "quarterly_review": "QR"}
+
+
+def sync_disclaimer():
+    """report_utils.DISCLAIMER_TEXT를 문단별로 나눠 data/disclaimer.json에 쓴다 (python-docx 없이 문자열만 읽음)."""
+    src = STOCK / "shared" / "report_utils.py"
+    tree = ast.parse(src.read_text(encoding="utf-8"))
+    text = next(ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign)
+                and any(getattr(t, "id", None) == "DISCLAIMER_TEXT" for t in n.targets))
+    paras = [p.strip() for p in text.split("\n\n") if p.strip()]
+    data = {"ko": [p for p in paras if re.search(r"[가-힣]", p)],
+            "en": [p for p in paras if not re.search(r"[가-힣]", p)]}
+    out = SITE / "data" / "disclaimer.json"
+    out.parent.mkdir(exist_ok=True)
+    new = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    if not out.is_file() or out.read_text(encoding="utf-8") != new:
+        out.write_text(new, encoding="utf-8")
+        print(f"[면책 문구] data/disclaimer.json 갱신 <- {src.relative_to(STOCK).as_posix()}")
 
 
 def companies():
@@ -52,9 +75,14 @@ def main():
     ap.add_argument("--type", action="append", choices=list(CODES.values()), help="BO / WR / QR (여러 번 가능)")
     ap.add_argument("--all", action="store_true", help="모든 기업")
     ap.add_argument("--list", action="store_true", help="목록만 보기")
+    ap.add_argument("--disclaimer", action="store_true", help="면책 문구만 다시 가져오기")
     a = ap.parse_args()
-    if not (a.company or a.all or a.list):
-        ap.error("회사명·종목코드, --all, --list 중 하나가 필요합니다")
+    if not (a.company or a.all or a.list or a.disclaimer):
+        ap.error("회사명·종목코드, --all, --list, --disclaimer 중 하나가 필요합니다")
+    if not a.list:
+        sync_disclaimer()
+    if a.disclaimer and not (a.company or a.all):
+        return
 
     targets = [c for c in companies() if a.all or a.list or a.company in (c[0], c[1])]
     if not targets:

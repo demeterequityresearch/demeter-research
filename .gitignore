@@ -1,5 +1,9 @@
 public/
 resources/
 content/reports/
+content/companies/
 .hugo_build.lock
 .claude/
+
+# 비공개 초안 (Artifact 디자인 시안 등, 공개 저장소에 올리지 않음)
+_drafts/

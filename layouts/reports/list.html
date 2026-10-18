@@ -1,0 +1,37 @@
+{{- define "main" }}
+{{- /* /reports/ : 모든 리포트 (종류별 거르기) */ -}}
+{{- $reports := (where site.RegularPages "Section" "reports").ByDate.Reverse }}
+<div class="view">
+  <div class="page-head">
+    <span class="eyebrow">Reports</span>
+    <h1>발간 리포트</h1>
+    <p>최종 점검을 마친 리포트입니다. 회사 이름을 누르면 그 회사의 리포트를 모아 볼 수 있습니다.</p>
+  </div>
+  <div class="filters" role="group" aria-label="리포트 종류">
+    <button type="button" data-f="all" aria-pressed="true">전체</button>
+    {{- range site.Params.reportTypes }}
+    <button type="button" data-f="{{ .key }}" aria-pressed="false">{{ .name }}</button>
+    {{- end }}
+  </div>
+  {{- if $reports }}
+  <ul class="report-list with-co" id="all-list">
+    {{- range $reports }}{{ partial "report-row.html" (dict "page" . "withCompany" true) }}{{ end }}
+  </ul>
+  {{- end }}
+  <p class="co-empty" id="all-empty"{{ if $reports }} hidden{{ end }}>이 종류의 리포트는 아직 발간되지 않았습니다.</p>
+</div>
+<script>
+(function () {
+  var rows = document.querySelectorAll('#all-list .row');
+  var empty = document.getElementById('all-empty');
+  document.querySelector('.filters').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-f]');
+    if (!b) return;
+    document.querySelectorAll('.filters button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    var shown = 0;
+    rows.forEach(function (r) { var on = b.dataset.f === 'all' || r.dataset.type === b.dataset.f; r.hidden = !on; if (on) shown++; });
+    empty.hidden = shown > 0;
+  });
+})();
+</script>
+{{- end }}

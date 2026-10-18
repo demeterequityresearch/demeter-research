@@ -1,0 +1,17 @@
+{{- /* 바닥글: 모든 페이지에 국문/영문 면책 고지. 원본은 Stock analysis reports/shared/report_utils.py의 DISCLAIMER_TEXT → scripts/publish.py가 data/disclaimer.json으로 옮김 */ -}}
+<footer class="site-foot">
+  <div class="wrap">
+    <h2>Disclaimer</h2>
+    {{- range site.Data.disclaimer.ko }}
+    <p>{{ . }}</p>
+    {{- end }}
+    {{- range site.Data.disclaimer.en }}
+    <p lang="en">{{ . }}</p>
+    {{- end }}
+    <div class="foot-line">
+      <span>&copy; {{ now.Year }} {{ site.Title }}</span>
+      <span>투자 권유 아님 · 목표주가·투자의견 미제시</span>
+    </div>
+  </div>
+</footer>
+{{- partial "extend_footer.html" . }}

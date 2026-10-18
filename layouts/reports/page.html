@@ -1,0 +1,20 @@
+{{- define "main" }}
+{{- /* 리포트 한 편: 홈 / 회사 / 종류 경로, 제목, PDF 보기 + 다운로드 (본문은 scripts/convert.py가 만든 index.md) */ -}}
+{{- $co := site.GetPage (printf "/companies/%s" (.Params.code | default "")) }}
+<article class="view report-page">
+  <p class="crumb">
+    <a href="{{ "" | relLangURL }}">홈</a> /
+    {{- with $co }} <a href="{{ .RelPermalink }}">{{ .Title }}</a> /{{ end }}
+    {{- range where site.Params.reportTypes "key" .Params.reportType }}
+    {{- if $co }} <a href="{{ $co.RelPermalink }}#sec-{{ .key | lower }}">{{ .name }}</a>{{ else }} {{ .name }}{{ end }}
+    {{- end }}
+  </p>
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+    <p class="r-date">{{ .Date.Format "2006-01-02" }}</p>
+  </header>
+  <div class="report-body">
+    {{ .Content }}
+  </div>
+</article>
+{{- end }}

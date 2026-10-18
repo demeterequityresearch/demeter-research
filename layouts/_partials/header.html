@@ -1,0 +1,18 @@
+{{- /* 상단 녹색 바: 엠블럼 + 사이트 이름(홈 링크) + 메뉴. PaperMod 기본 헤더를 대신함 */ -}}
+<header class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="{{ "" | relLangURL }}" accesskey="h">
+      <img src="{{ site.Params.label.icon | relURL }}" alt="" width="34" height="34">
+      <span>{{ site.Title }}</span>
+    </a>
+    <nav aria-label="주 메뉴">
+      <ul>
+        {{- $page := . }}
+        {{- range site.Menus.main }}
+        {{- $on := or ($page.IsMenuCurrent "main" .) ($page.HasMenuCurrent "main" .) }}
+        <li><a href="{{ .URL }}"{{ if $on }} aria-current="page"{{ end }}>{{ .Name }}</a></li>
+        {{- end }}
+      </ul>
+    </nav>
+  </div>
+</header>

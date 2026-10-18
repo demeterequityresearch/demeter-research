@@ -2,8 +2,9 @@
 
 파일명 규칙 (Stock analysis reports와 공통, 2026-10-18):
   <YYYYMMDD>_<회사명>_<종목코드>_<BO|WR|QR>[_<기간>][_vN].pdf
-  예: 20261018_코세스_089890_BO_v5.pdf      ->  '코세스 사업 개요', /reports/20261018-089890-bo/
-      20261115_코세스_089890_QR_2026Q3.pdf  ->  '코세스 2026 3Q 실적 리뷰', /reports/20261115-089890-qr-2026q3/
+  예: 20261018_코세스_089890_BO_v5.pdf      ->  '코세스 기업 기본 분석', /reports/20261018-089890-bo/
+      20261115_코세스_089890_QR_2026Q3.pdf  ->  '코세스 2026 3Q 분기 실적 분석', /reports/20261115-089890-qr-2026q3/
+회사마다 회사 페이지(/companies/<종목코드>/)도 만듭니다. 화면은 layouts/companies/list.html.
 같은 리포트의 버전이 여러 개 있으면 가장 높은 버전만 올립니다.
 규칙에 맞지 않는 이름(예: 2026-10-18_제목.pdf)은 날짜와 제목만 읽습니다.
 같은 이름의 docx와 pdf가 함께 있으면 본문은 docx, PDF는 다운로드 링크로 붙습니다.
@@ -12,11 +13,13 @@ import pathlib, re, shutil, subprocess
 
 SRC = pathlib.Path("reports")
 DST = pathlib.Path("content/reports")
+COMPANIES = pathlib.Path("content/companies")
 
+# 사이트에 보이는 이름 (약자 BO/WR/QR는 화면에 쓰지 않음). 회사 페이지의 칸 이름·설명은 hugo.toml의 params.reportTypes
 TYPES = {
-    "BO": ("사업 개요", "Business Overview"),
-    "WR": ("주간 리포트", "Weekly Report"),
-    "QR": ("실적 리뷰", "Quarterly Review"),
+    "BO": ("기업 기본 분석", "Business Overview"),
+    "WR": ("주간 업데이트", "Weekly Update"),
+    "QR": ("분기 실적 분석", "Quarterly Review"),
 }
 STD = re.compile(
     r"(?P<date>\d{8}|\d{4}-\d{2}-\d{2})_(?P<company>[^_]+)_(?P<code>\d[0-9A-Z]{4}\d)_(?P<type>BO|WR|QR)"
@@ -26,6 +29,9 @@ STD = re.compile(
 # 리포트가 하나도 없어도 메뉴의 '리포트' 목록 페이지가 404가 나지 않도록 섹션 페이지를 만들어 둡니다
 DST.mkdir(parents=True, exist_ok=True)
 (DST / "_index.md").write_text('---\ntitle: "리포트"\n---\n', encoding="utf-8")
+shutil.rmtree(COMPANIES, ignore_errors=True)
+COMPANIES.mkdir(parents=True)
+(COMPANIES / "_index.md").write_text('---\ntitle: "기업"\n---\n', encoding="utf-8")
 
 
 def parse(stem):
@@ -40,7 +46,7 @@ def parse(stem):
         title = f'{m["company"]} {period[:4]} {period[5]}Q {ko}' if period else f'{m["company"]} {ko}'
         slug = "-".join(filter(None, [d, m["code"], m["type"].lower(), (period or "").lower()]))
         meta = {"title": title, "date": date, "company": m["company"], "code": m["code"],
-                "type": m["type"], "typeName": en}
+                "reportType": m["type"], "typeName": en}  # "type"은 Hugo 예약어(화면 종류)라 쓰지 않음
         if period:
             meta["period"] = period
         return slug, int(m["ver"] or 1), meta
@@ -87,7 +93,18 @@ for slug, r in sorted(reports.items()):
         shutil.copy(files[".pdf"], bundle / "report.pdf")
         if not body:
             body = '<iframe src="report.pdf" width="100%" height="900" style="border:0"></iframe>\n\n'
-        body += f'\n\n<a href="report.pdf" download="{files[".pdf"].name}">📄 PDF 다운로드</a>\n'
+        body += f'\n\n<a class="pdf-link" href="report.pdf" download="{files[".pdf"].name}">PDF 다운로드</a>\n'
 
     (bundle / "index.md").write_text(front + body, encoding="utf-8")
     print(f"converted: {slug}  <-  {', '.join(sorted(p.name for p in files.values()))}")
+
+# 회사 페이지: 종목코드마다 하나 (회사명은 날짜가 가장 늦은 리포트의 것)
+companies = {}
+for slug, r in sorted(reports.items()):
+    m = r["meta"]
+    if "code" in m:
+        companies[m["code"]] = m["company"]
+for code, name in sorted(companies.items()):
+    (COMPANIES / code).mkdir()
+    (COMPANIES / code / "_index.md").write_text(f'---\ntitle: "{name}"\ncode: "{code}"\n---\n', encoding="utf-8")
+    print(f"company page: {code} {name}")

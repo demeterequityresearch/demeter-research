@@ -3,43 +3,54 @@ languageCode = "ko-kr"
 title = "Demeter Equity Research"
 theme = "PaperMod"
 
-# 마크다운 안의 HTML(iframe 등) 허용 — PDF 임베드에 필요
+# 마크다운 안의 HTML(iframe, 소개·리서치 방법 페이지의 레이아웃) 허용
 [markup.goldmark.renderer]
   unsafe = true
 
-# 홈 검색바용 색인(index.json)
+# 홈 검색바용 색인(index.json, 회사 목록)
 [outputs]
   home = ["HTML", "RSS", "JSON"]
 
 [params]
-  ShowReadingTime = true
-  ShowToc = true
-  ShowPostNavLinks = true
+  # 다크 모드는 기기 설정을 따름 (전환 버튼 없음)
+  defaultTheme = "auto"
+  disableThemeToggle = true
+  disableScrollToTop = true
+  ShowReadingTime = false
+  ShowToc = false
   mainSections = ["reports"]
 
-  # 상단 왼쪽 로고 (static/images/logo.png, 사이트 이름 왼쪽에 표시)
+  # 상단 왼쪽 엠블럼 (static/images/logo.png)
   [params.label]
     icon = "images/logo.png"
-    iconHeight = 36
 
-  # 홈 검색바 아래 면책 고지 (Stock analysis reports의 표준 문안 기반)
-  [params.disclaimer]
-    ko = [
-      "본 사이트의 자료는 Demeter Equity Research(이하 'Demeter')가 공개된 정보를 바탕으로 작성한 기업 분석 자료로, 정보 제공만을 목적으로 합니다. 특정 증권의 매수·매도를 권유하거나 투자 자문을 제공하기 위한 것이 아니며, 개인의 투자 목적·재무 상황·위험 성향을 고려하지 않았습니다. 목표주가나 투자의견을 제시하지 않으며, 인용된 증권사 목표주가와 추정치는 해당 기관의 의견입니다.",
-      "자료의 정보는 금융감독원 전자공시(DART), 한국거래소(KRX), 관세청 등 공공 데이터와 신뢰할 수 있다고 판단되는 언론 보도·조사기관 자료에 근거하나, Demeter는 그 정확성·완전성·적시성을 보장하지 않습니다. 분석과 의견은 작성 시점 기준이며 사전 통지 없이 변경될 수 있습니다.",
-      "과거 실적은 미래 성과를 보장하지 않으며, 투자 판단과 그 결과에 대한 책임은 투자자 본인에게 있습니다. Demeter와 작성자는 자료의 이용으로 발생한 손실에 대해 책임지지 않습니다. 자료를 인용할 때는 출처를 밝혀야 하며, Demeter의 사전 동의 없이 내용을 변경해 배포할 수 없습니다.",
-    ]
-    en = [
-      "The reports on this site are prepared by Demeter Equity Research based on publicly available information for informational purposes only. They do not constitute an offer, solicitation, investment recommendation or investment advice, and do not take into account any individual's objectives, financial situation or risk tolerance. No target price or rating is provided; third-party estimates and target prices cited are the views of their respective sources. Information is based on public filings, exchange data and third-party sources believed to be reliable, but its accuracy and completeness are not guaranteed. Investors are solely responsible for their investment decisions.",
-    ]
+  # 리포트 종류: 회사 페이지의 세 칸 순서·이름·설명. 리포트 제목에 쓰는 이름은 scripts/convert.py의 TYPES (둘을 같이 고칠 것)
+  [[params.reportTypes]]
+    key = "BO"
+    name = "기업 기본 분석"
+    desc = "산업 구조, 경쟁 구도, 재무, Peer 대비 밸류에이션, 주가 변동 요인을 정리한 기본 리포트입니다."
+  [[params.reportTypes]]
+    key = "WR"
+    name = "주간 업데이트"
+    desc = "한 주의 시세와 기술적 지표, 공시와 보도, 모니터링 지표의 변화를 짚습니다."
+  [[params.reportTypes]]
+    key = "QR"
+    name = "분기 실적 분석"
+    desc = "분기 실적을 직전 분기·전년 동기·컨센서스와 비교하고 앞선 리포트의 가설을 점검합니다."
 
-# 상단 메뉴 (검색은 홈 화면 검색바로 대체)
+  # 면책 고지(모든 페이지 바닥글)는 data/disclaimer.json (원본 report_utils.DISCLAIMER_TEXT, scripts/publish.py가 옮김)
+
+# 상단 메뉴 (검색은 홈 화면 검색바)
 [menu]
-  [[menu.main]]
-    name = "리포트"
-    pageRef = "/reports"
-    weight = 1
   [[menu.main]]
     name = "소개"
     pageRef = "/about"
+    weight = 1
+  [[menu.main]]
+    name = "리서치 방법"
+    pageRef = "/method"
     weight = 2
+  [[menu.main]]
+    name = "리포트"
+    pageRef = "/reports"
+    weight = 3

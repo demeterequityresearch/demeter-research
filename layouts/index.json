@@ -1,12 +1,9 @@
-{{- /* 홈 검색바가 쓰는 검색 색인: 리포트별 제목·회사명·종목코드·날짜 */ -}}
+{{- /* 홈 검색바가 쓰는 색인: 회사별 이름·종목코드·리포트 수·회사 페이지 주소 */ -}}
 {{- $index := slice -}}
-{{- range where site.RegularPages "Section" "reports" -}}
-    {{- $index = $index | append (dict
-        "title" .Title
-        "company" (.Params.company | default "")
-        "code" (.Params.code | default "")
-        "date" (.Date.Format "2006-01-02")
-        "permalink" .RelPermalink
-        "summary" (.Summary | plainify | truncate 120)) -}}
+{{- with site.GetPage "/companies" -}}
+  {{- range .Sections -}}
+    {{- $n := len (where (where site.RegularPages "Section" "reports") "Params.code" .Params.code) -}}
+    {{- $index = $index | append (dict "name" .Title "code" .Params.code "count" $n "permalink" .RelPermalink) -}}
+  {{- end -}}
 {{- end -}}
 {{- $index | jsonify -}}
