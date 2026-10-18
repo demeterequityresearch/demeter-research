@@ -8,6 +8,10 @@ import pathlib, re, shutil, subprocess
 SRC = pathlib.Path("reports")
 DST = pathlib.Path("content/reports")
 
+# 리포트가 하나도 없어도 메뉴의 '리포트' 목록 페이지가 404가 나지 않도록 섹션 페이지를 만들어 둡니다
+DST.mkdir(parents=True, exist_ok=True)
+(DST / "_index.md").write_text('---\ntitle: "리포트"\n---\n', encoding="utf-8")
+
 groups = {}
 for f in SRC.iterdir():
     if f.suffix.lower() in (".docx", ".pdf"):
