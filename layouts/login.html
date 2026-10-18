@@ -86,13 +86,13 @@
   // Supabase 오류 문구 → 한국어
   function ko(err) {
     var m = (err && (err.message || err.error_description)) || '';
+    if (/expired|invalid.*(link|token)|otp/i.test(m)) return '링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.';
     if (/Invalid login credentials/i.test(m)) return '이메일 또는 비밀번호가 맞지 않습니다.';
     if (/Email not confirmed/i.test(m)) return '이메일 인증을 아직 마치지 않았습니다. 가입할 때 받은 메일의 링크를 눌러 주세요.';
-    if (/rate limit|too many/i.test(m)) return '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+    if (/rate limit|too many|only request this after/i.test(m)) return '요청이 너무 많습니다. 1분쯤 뒤에 다시 시도해 주세요.';
     if (/at least|weak|short/i.test(m)) return '비밀번호는 8자 이상으로 정해 주세요.';
     if (/invalid.*email|email.*invalid|unable to validate email/i.test(m)) return '이메일 주소를 확인해 주세요.';
     if (/same.*password|different from the old/i.test(m)) return '지금 쓰는 비밀번호와 다른 비밀번호로 정해 주세요.';
-    if (/expired|invalid.*(link|token)|otp/i.test(m)) return '링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.';
     return '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' + (m ? ' (' + m + ')' : '');
   }
 
@@ -118,8 +118,15 @@
     } else if (mode === 'signup') {
       job = sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: back() } }).then(function (r) {
         if (r.error) throw r.error;
+        // 이미 인증까지 마친 주소면 Supabase는 오류 없이 identities가 빈 계정을 돌려주고 메일을 보내지 않음
+        var u = r.data && r.data.user;
+        if (u && Array.isArray(u.identities) && u.identities.length === 0) {
+          setMode('login', true);
+          form.email.value = email;
+          return say('이미 가입된 이메일입니다. 로그인해 주세요. 비밀번호가 기억나지 않으면 아래 "비밀번호를 잊으셨나요?"를 눌러 주세요.', true);
+        }
         form.reset();
-        say(email + ' 로 인증 메일을 보냈습니다. 메일의 링크를 누르면 가입이 끝납니다. 메일이 오지 않으면 스팸함을 확인하거나, 이미 가입한 주소라면 로그인해 주세요.');
+        say(email + ' 로 인증 메일을 보냈습니다. 메일의 링크를 누르면 가입이 끝납니다. 메일이 오지 않으면 스팸함을 확인해 주세요.');
       });
     } else if (mode === 'reset') {
       job = sb.auth.resetPasswordForEmail(email, { redirectTo: back() }).then(function (r) {

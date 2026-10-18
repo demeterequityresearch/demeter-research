@@ -4,6 +4,7 @@
    - 준비가 끝나면 'demeter:ready' 이벤트로 페이지 스크립트(로그인 페이지, 리포트 페이지)에 { sb, session }을 넘김 */
 (function () {
   var C = window.DEMETER;
+  if (C.leaving) return;  // 인증 링크를 로그인 페이지로 넘기는 중 (member.html): 여기서 #토큰을 쓰지 않음
   var sb = window.supabase.createClient(C.url, C.key, {
     // 인증 메일 링크를 다른 기기·브라우저에서 열어도 되도록 implicit 방식
     auth: { flowType: 'implicit', detectSessionInUrl: true, persistSession: true, storageKey: C.storageKey }

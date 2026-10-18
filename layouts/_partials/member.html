@@ -14,8 +14,17 @@ window.DEMETER = {
   gated: {{ $gated }},
   storageKey: {{ printf "sb-%s-auth-token" $ref }}
 };
+{{- if ne .RelPermalink ("login/" | relURL) }}
+// 인증·비밀번호 재설정 메일 링크가 다른 페이지(예: 대시보드에서 보낸 메일은 메인)로 돌아와도
+// supabase가 주소의 #부분을 쓰기 전에 로그인 페이지로 넘김 (새 비밀번호 칸·환영 문구는 로그인 페이지에 있음)
+if (/(^#|&)(type=(recovery|signup|invite|magiclink|email_change)|error_code=)/.test(location.hash)) {
+  window.DEMETER.leaving = true;
+  location.replace(window.DEMETER.login + location.hash);
+}
+{{- end }}
 {{- if $gated }}
 (function () {
+  if (window.DEMETER.leaving) return;
   var has = false;
   try { has = !!localStorage.getItem(window.DEMETER.storageKey); } catch (e) {}
   if (!has) location.replace(window.DEMETER.login + '?next=' + encodeURIComponent(location.pathname + location.search + location.hash));
