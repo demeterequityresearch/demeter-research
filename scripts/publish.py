@@ -15,16 +15,15 @@ R2에 올릴 때 Cloudflare API 토큰이 필요합니다: .secrets.env의 CLOUD
   python scripts/publish.py 코세스             코세스의 모든 종류 최종본
   python scripts/publish.py 089890 --type BO  종목코드 + 종류(BO/WU/QR) 지정
   python scripts/publish.py --all             모든 기업의 최종본
-  python scripts/publish.py --disclaimer      면책 문구만 다시 가져오기
 올린 뒤 git commit & push 하면 사이트에 반영됩니다.
 
 리포트 제목(헤드라인)은 원본 docx 첫 장의 'Equity Research | …' 줄 바로 다음 문단이다.
 올릴 때 reports/<표준 파일명>.json 에 기록하고, scripts/convert.py가 front matter로 옮긴다.
 
-면책 문구는 리포트와 한 벌이다: 원본은 Stock analysis reports/shared/report_utils.py의 DISCLAIMER_TEXT이고,
-올릴 때마다(또는 --disclaimer) data/disclaimer.json으로 옮겨 바닥글(layouts/_partials/footer.html)이 읽는다.
+사이트 바닥글의 면책 문구는 리포트와 따로 쓴다(2026-10-20 사용자 결정): data/disclaimer.json을 이 폴더에서 직접 고친다.
+리포트 Disclaimer(report_utils.DISCLAIMER_TEXT)와 핵심(투자 권유 아님, 목표주가·투자의견 미제시, 책임은 투자자)은 같게 유지한다.
 """
-import argparse, ast, json, pathlib, re, shutil, sys
+import argparse, json, pathlib, re, shutil, sys
 
 # 리포트 폴더는 이 웹사이트 폴더의 옆 폴더 (둘 다 Documents/Demeter Equity Research 아래)
 SITE = pathlib.Path(__file__).resolve().parent.parent
@@ -37,23 +36,6 @@ KEEP = {"BO": 5, "QR": 8, "WU": 12}  # R2·사이트에 남기는 종목별 개�
 sys.path.insert(0, str(SITE / "scripts"))
 from convert import parse  # noqa: E402  표준 파일명 -> 페이지 주소·보관함 파일 이름 (convert.py 한 곳에서 정함)
 from cloudflare import r2_delete, r2_put  # noqa: E402
-
-
-def sync_disclaimer():
-    """report_utils.DISCLAIMER_TEXT를 문단별로 나눠 data/disclaimer.json에 쓴다 (python-docx 없이 문자열만 읽음)."""
-    src = STOCK / "shared" / "report_utils.py"
-    tree = ast.parse(src.read_text(encoding="utf-8"))
-    text = next(ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign)
-                and any(getattr(t, "id", None) == "DISCLAIMER_TEXT" for t in n.targets))
-    paras = [p.strip() for p in text.split("\n\n") if p.strip()]
-    data = {"ko": [p for p in paras if re.search(r"[가-힣]", p)],
-            "en": [p for p in paras if not re.search(r"[가-힣]", p)]}
-    out = SITE / "data" / "disclaimer.json"
-    out.parent.mkdir(exist_ok=True)
-    new = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
-    if not out.is_file() or out.read_text(encoding="utf-8") != new:
-        out.write_text(new, encoding="utf-8")
-        print(f"[면책 문구] data/disclaimer.json 갱신 <- {src.relative_to(STOCK).as_posix()}")
 
 
 def headline(docx_path):
@@ -119,14 +101,9 @@ def main():
     ap.add_argument("--type", action="append", choices=list(CODES.values()), help="BO / WU / QR (여러 번 가능)")
     ap.add_argument("--all", action="store_true", help="모든 기업")
     ap.add_argument("--list", action="store_true", help="목록만 보기")
-    ap.add_argument("--disclaimer", action="store_true", help="면책 문구만 다시 가져오기")
     a = ap.parse_args()
-    if not (a.company or a.all or a.list or a.disclaimer):
-        ap.error("회사명·종목코드, --all, --list, --disclaimer 중 하나가 필요합니다")
-    if not a.list:
-        sync_disclaimer()
-    if a.disclaimer and not (a.company or a.all):
-        return
+    if not (a.company or a.all or a.list):
+        ap.error("회사명·종목코드, --all, --list 중 하나가 필요합니다")
 
     targets = [c for c in companies() if a.all or a.list or a.company in (c[0], c[1])]
     if not targets:
