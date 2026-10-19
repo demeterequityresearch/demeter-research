@@ -20,7 +20,7 @@ theme = "PaperMod"
   ShowToc = false
   mainSections = ["reports"]
 
-  # 상단 왼쪽 엠블럼 (static/images/logo.png)
+  # 사이트 아이콘(static/images/logo.png, 파비콘과 같은 "a." 모양). 상단 로고는 header.html의 글자 로고
   [params.label]
     icon = "images/logo.png"
 

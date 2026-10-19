@@ -1,9 +1,8 @@
-{{- /* 상단 녹색 바: 엠블럼 + 사이트 이름(홈 링크) + 메뉴 + 로그인/로그아웃(static/js/member.js가 바꿈). PaperMod 기본 헤더를 대신함 */ -}}
+{{- /* 상단 녹색 바: alphainsight 글자 로고(홈 링크, Manrope 글꼴로 그림) + 메뉴 + 로그인/로그아웃(static/js/member.js가 바꿈). PaperMod 기본 헤더를 대신함 */ -}}
 <header class="site-nav">
   <div class="wrap">
     <a class="brand" href="{{ "" | relLangURL }}" accesskey="h">
-      <img src="{{ site.Params.label.icon | relURL }}" alt="" width="34" height="34">
-      <span>{{ site.Title }}</span>
+      <span class="wordmark" aria-label="{{ site.Title }}"><b>alpha</b>insight<i aria-hidden="true"></i></span>
     </a>
     <nav aria-label="주 메뉴">
       <ul>

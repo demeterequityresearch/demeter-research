@@ -13,7 +13,7 @@
     --gold: #B68C51;
     --gold-text: #87642F;   /* 밝은 바탕 위 금색 글자 */
     --chip: #E6EBE6;
-    --font-mark: "Cinzel", "Times New Roman", serif;
+    --font-mark: "Manrope", "IBM Plex Sans KR", sans-serif;
     --font-head: "Gowun Batang", "Nanum Myeongjo", "Batang", serif;
     --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-data: "IBM Plex Mono", "Consolas", monospace;
@@ -146,17 +146,28 @@ h3 {
     gap: 12px;
 }
 
-.brand img {
-    width: 34px;
-    height: 34px;
+/* alphainsight 글자 로고: alpha 굵게 + insight 보통 + 금색 점 (_drafts/logo/alphainsight_logo.png와 같은 모양) */
+.wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: var(--font-mark);
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -.03em;
+    color: var(--band-ink);
 }
 
-.brand span {
-    font-family: var(--font-mark);
-    font-weight: 600;
-    font-size: 16px;
-    letter-spacing: .12em;
-    color: var(--band-ink);
+.wordmark b {
+    font-weight: 800;
+}
+
+.wordmark i {
+    width: .24em;
+    height: .24em;
+    margin-left: .08em;
+    border-radius: 50%;
+    background: #C9A46A;
 }
 
 .site-nav ul {
@@ -982,14 +993,8 @@ a.r-co:hover {
 }
 
 @media (max-width: 560px) {
-    .brand img {
-        width: 30px;
-        height: 30px;
-    }
-
-    .brand span {
-        font-size: 14px;
-        letter-spacing: .08em;
+    .wordmark {
+        font-size: 22px;
     }
 
     .site-nav ul {
