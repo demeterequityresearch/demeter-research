@@ -1,7 +1,7 @@
 ---
 title: "개인정보처리방침"
 eyebrow: "Privacy"
-description: "Demeter Equity Research가 회원 가입과 리포트 제공을 위해 처리하는 개인정보에 관한 안내입니다."
+description: "알파인사이트(Alpha Insight)가 회원 가입과 리포트 제공을 위해 처리하는 개인정보에 관한 안내입니다."
 url: "/privacy/"
 ---
 
@@ -30,7 +30,9 @@ url: "/privacy/"
 
 | 받는 곳 | 맡기는 일 | 저장 위치 |
 |---|---|---|
-| Supabase Inc. | 회원 인증, 데이터·리포트 파일 저장 | 대한민국(서울) |
+| Supabase Inc. | 회원 인증, 열람·다운로드 기록 저장 | 대한민국(서울) |
+| Cloudflare, Inc. | 리포트 파일 저장과 회원 확인 후 전달, 문의 메일 전달 | 미국 등 Cloudflare 데이터센터 |
+| Resend, Inc. | 가입 인증·비밀번호 재설정 메일 발송 | 일본(도쿄) |
 
 ## 5. 이용자의 권리
 
@@ -38,5 +40,5 @@ url: "/privacy/"
 
 ## 6. 개인정보 보호 책임자와 연락처
 
-- 책임자: Demeter Equity Research 운영자
-- 연락처: demeter.equityresearch@gmail.com
+- 책임자: 알파인사이트(Alpha Insight) 운영자
+- 연락처: contact@alphainsight.co.kr

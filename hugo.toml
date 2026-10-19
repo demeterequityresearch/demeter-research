@@ -1,6 +1,6 @@
 baseURL = "https://alphainsight.co.kr/"
 languageCode = "ko-kr"
-title = "Demeter Equity Research"
+title = "Alpha Insight"
 theme = "PaperMod"
 
 # 마크다운 안의 HTML(iframe, 소개·리서치 방법 페이지의 레이아웃) 허용
