@@ -1,4 +1,4 @@
-baseURL = "https://demeterequityresearch.github.io/demeter-research/"
+baseURL = "https://alphainsight.co.kr/"
 languageCode = "ko-kr"
 title = "Demeter Equity Research"
 theme = "PaperMod"
@@ -54,7 +54,7 @@ theme = "PaperMod"
     bucket = "demeter-reports"
     workerName = "demeter-reports"
     worker = "https://demeter-reports.demeter-equityresearch.workers.dev"
-    allowedOrigins = "https://demeterequityresearch.github.io"
+    allowedOrigins = "https://alphainsight.co.kr,https://www.alphainsight.co.kr,https://demeterequityresearch.github.io"
 
   # 면책 고지(모든 페이지 바닥글)는 data/disclaimer.json (원본 report_utils.DISCLAIMER_TEXT, scripts/publish.py가 옮김)
 
