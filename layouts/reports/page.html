@@ -1,7 +1,7 @@
 {{- define "main" }}
 {{- /* 리포트 한 편: 홈 / 회사 / 종류 경로, 제목(리포트 헤드라인), PDF 보기 (회원만, 다운로드 버튼 없음 2026-10-18)
-       PDF는 Supabase 비공개 보관함에 있음(.Params.file). 열 때마다 기록표(downloads, kind=view)에 남긴 뒤 임시 주소로 받아 pdf.js로 그림.
-       보관함 규칙상 기록을 먼저 남겨야 열림 (supabase/setup.sql) */ -}}
+       PDF는 Cloudflare R2 비공개 버킷에 있고(.Params.file), 회원 확인 Worker(worker/index.js)가 기록표(downloads)에 남긴 뒤 보내 줌 → pdf.js로 그림.
+       hugo.toml [params.cloudflare] worker가 비어 있으면(전환 전) 예전처럼 Supabase 보관함에서: 기록 → 임시 주소 (supabase/setup.sql) */ -}}
 {{- $co := site.GetPage (printf "/companies/%s" (.Params.code | default "")) }}
 <article class="view report-page">
   <p class="crumb">
@@ -36,7 +36,12 @@
       document.getElementById('pdfjs').addEventListener('load', ok);
     });
 
-    // 기록을 남기고 임시 주소(10분)를 받음. 보관함 규칙상 기록이 먼저여야 열림
+    // R2 + Worker: 로그인 토큰을 붙여 Worker에 요청 (Worker가 확인·기록 후 PDF를 보냄)
+    function fromWorker(session) {
+      return { url: window.DEMETER.worker + '/report/' + file, httpHeaders: { Authorization: 'Bearer ' + session.access_token } };
+    }
+
+    // (전환 전) Supabase 보관함: 기록을 남기고 임시 주소(10분)를 받음. 보관함 규칙상 기록이 먼저여야 열림
     function signedUrl(sb) {
       return sb.from('downloads').insert({ report: file, kind: 'view' }).then(function (r) {
         if (r.error) throw r.error;
@@ -48,11 +53,12 @@
     }
 
     // PDF를 페이지마다 그림(canvas)으로 그림: 전화기 브라우저에서도 보이고, 브라우저 PDF 뷰어의 다운로드 버튼이 없음
-    function render(url) {
+    function render(src) {
+      if (typeof src === 'string') src = { url: src };
       return lib.then(function () {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        // cMap: 글꼴이 박혀 있지 않은 한글 PDF도 글자가 나오도록
-        return pdfjsLib.getDocument({ url: url, cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true }).promise;
+        // cMap: 글꼴이 박혀 있지 않은 한글 PDF도 글자가 나오도록. 부분 요청(Range)은 쓰지 않음
+        return pdfjsLib.getDocument(Object.assign({ cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true, disableRange: true }, src)).promise;
       }).then(function (pdf) {
         box.replaceChildren();
         var ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -75,7 +81,8 @@
 
     document.addEventListener('demeter:ready', function (e) {
       if (!e.detail.session) return;
-      signedUrl(e.detail.sb).then(render).catch(function () {
+      var source = window.DEMETER.worker ? Promise.resolve(fromWorker(e.detail.session)) : signedUrl(e.detail.sb);
+      source.then(render).catch(function () {
         note.textContent = '리포트를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';
         box.replaceChildren(note);
       });

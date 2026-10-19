@@ -46,6 +46,16 @@ theme = "PaperMod"
     key = "sb_publishable_ekB9Lp0c1a3OTNK5A5quVw_R8l-2y_Y"
     bucket = "reports"
 
+  # 리포트 PDF 보관(2026-10-19 사용자 결정, Supabase 무료 1GB 대신): Cloudflare R2 비공개 버킷 + 회원 확인 Worker.
+  # 공개값만 둠. API 토큰은 .secrets.env의 CLOUDFLARE_API_TOKEN (scripts/cloudflare.py)
+  # 종목별 보관 개수(넘으면 가장 오래된 것을 R2와 사이트 목록에서 지움, 전체 게시본은 ../Published): scripts/publish.py의 KEEP
+  [params.cloudflare]
+    accountId = "63462e99d11f4ba3d07c93deabf1a8b2"
+    bucket = "demeter-reports"
+    workerName = "demeter-reports"
+    worker = "https://demeter-reports.demeter-equityresearch.workers.dev"
+    allowedOrigins = "https://demeterequityresearch.github.io"
+
   # 면책 고지(모든 페이지 바닥글)는 data/disclaimer.json (원본 report_utils.DISCLAIMER_TEXT, scripts/publish.py가 옮김)
 
 # 상단 메뉴 (검색은 홈 화면 검색바)

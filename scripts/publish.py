@@ -1,11 +1,14 @@
-"""Stock analysis reports의 최종본 PDF를 회원 전용 보관함(Supabase)에 올리고, 웹사이트 reports/ 에 목록(.json)을 남깁니다.
+"""Stock analysis reports의 최종본 PDF를 게시합니다: ../Published에 영구 보관 → Cloudflare R2(회원 전용)에 올림 → reports/ 에 목록(.json).
 
 최종본은 각 기업 profile.json의 latest_reports(리포트 에이전트가 register_report()로 기록)를 따릅니다.
 docx·초안·수정본(_수정, _검토 등)은 올리지 않고, 최종본과 같은 이름의 PDF만 올립니다.
-PDF는 공개 저장소에 두지 않습니다(회원만 열람·다운로드, 2026-10-18). reports/ 에는 표준 파일명의 .json(제목 정보)만 남습니다.
-보관함에 올릴 때 Supabase secret key가 필요합니다: 웹사이트 폴더의 .secrets.env (gitignore) 에
-  SUPABASE_SECRET_KEY=sb_secret_...
-한 줄을 사용자가 직접 넣어 둡니다. 이 키는 화면에 출력하거나 다른 곳에 복사하지 않습니다.
+PDF는 공개 저장소에 두지 않습니다(회원만 열람, 2026-10-18). reports/ 에는 표준 파일명의 .json(제목 정보)만 남습니다.
+
+보관(2026-10-19 사용자 결정):
+  - ../Published/<종목코드>_<회사명>/<BO|WU|QR>/<표준 파일명>.pdf 에 모든 게시본을 남김 (지우지 않음)
+  - R2에는 종목별로 KEEP 개수(BO 5, QR 8, WU 12)만 둠. 넘으면 가장 오래된 것을 R2와 reports/*.json 둘 다에서 지움
+    (사이트에는 R2에 있는 리포트만 보임). 같은 날짜·종류를 다시 올리면 덮어씀
+R2에 올릴 때 Cloudflare API 토큰이 필요합니다: .secrets.env의 CLOUDFLARE_API_TOKEN (scripts/cloudflare.py, 출력하지 않음)
 
 사용법 (웹사이트 폴더에서):
   python scripts/publish.py --list            올릴 수 있는 최종본 목록
@@ -21,17 +24,19 @@ PDF는 공개 저장소에 두지 않습니다(회원만 열람·다운로드, 2
 면책 문구는 리포트와 한 벌이다: 원본은 Stock analysis reports/shared/report_utils.py의 DISCLAIMER_TEXT이고,
 올릴 때마다(또는 --disclaimer) data/disclaimer.json으로 옮겨 바닥글(layouts/_partials/footer.html)이 읽는다.
 """
-import argparse, ast, json, pathlib, re, sys, tomllib, urllib.error, urllib.parse, urllib.request
+import argparse, ast, json, pathlib, re, shutil, sys
 
 # 리포트 폴더는 이 웹사이트 폴더의 옆 폴더 (둘 다 Documents/Demeter Equity Research 아래)
 SITE = pathlib.Path(__file__).resolve().parent.parent
 STOCK = SITE.parent / "Stock analysis reports"
 DEST = SITE / "reports"
-SECRETS = SITE / ".secrets.env"
+PUBLISHED = SITE.parent / "Published"
 CODES = {"business_overview": "BO", "weekly_update": "WU", "quarterly_review": "QR"}
+KEEP = {"BO": 5, "QR": 8, "WU": 12}  # R2·사이트에 남기는 종목별 개수
 
 sys.path.insert(0, str(SITE / "scripts"))
 from convert import parse  # noqa: E402  표준 파일명 -> 페이지 주소·보관함 파일 이름 (convert.py 한 곳에서 정함)
+from cloudflare import r2_delete, r2_put  # noqa: E402
 
 
 def sync_disclaimer():
@@ -65,26 +70,18 @@ def headline(docx_path):
     return None
 
 
-def secret_key():
-    """.secrets.env의 SUPABASE_SECRET_KEY (값은 출력하지 않음)"""
-    if SECRETS.is_file():
-        for line in SECRETS.read_text(encoding="utf-8-sig").splitlines():
-            k, _, v = line.partition("=")
-            if k.strip() == "SUPABASE_SECRET_KEY" and v.strip():
-                return v.strip()
-    sys.exit("Supabase secret key가 없습니다. 웹사이트 폴더의 .secrets.env 에 SUPABASE_SECRET_KEY=sb_secret_... 를 넣어 주세요.")
-
-
-def upload(pdf, name, key):
-    """PDF를 회원 전용 보관함(hugo.toml params.supabase.bucket)에 name으로 올림 (같은 이름이면 덮어씀)"""
-    sb = tomllib.loads((SITE / "hugo.toml").read_text(encoding="utf-8"))["params"]["supabase"]
-    url = f'{sb["url"]}/storage/v1/object/{sb["bucket"]}/{urllib.parse.quote(name)}'
-    req = urllib.request.Request(url, data=pdf.read_bytes(), method="POST", headers={
-        "apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/pdf", "x-upsert": "true"})
-    try:
-        urllib.request.urlopen(req, timeout=120).close()
-    except urllib.error.HTTPError as e:
-        sys.exit(f"보관함에 올리지 못했습니다 ({e.code}): {e.read().decode('utf-8', 'replace')[:300]}")
+def prune(code, type_):
+    """R2·사이트에 같은 종목·종류가 KEEP개를 넘으면 가장 오래된 것부터 지움 (Published에는 남음)"""
+    entries = []
+    for f in DEST.glob("*.json"):
+        p = parse(f.stem)
+        if p and p[1]["code"] == code and p[1]["reportType"] == type_:
+            entries.append((f.stem, f, p[1]["file"]))
+    entries.sort(reverse=True)  # 표준 파일명은 날짜로 시작하므로 이름순 = 날짜순
+    for _, f, key in entries[KEEP[type_]:]:
+        r2_delete(key)
+        f.unlink()
+        print(f"[정리] {f.stem}: 보관 개수({KEEP[type_]}개)를 넘어 R2와 사이트 목록에서 뺌 (Published에는 남음)")
 
 
 def companies():
@@ -136,7 +133,6 @@ def main():
         sys.exit(f"'{a.company}'에 해당하는 기업 프로필이 없습니다 (Stock analysis reports/_data/companies)")
 
     DEST.mkdir(exist_ok=True)
-    key = None
     for name, code, prof in targets:
         for src, stem, report in candidates(name, code, prof, a.type):
             entry = DEST / f"{stem}.json"
@@ -147,14 +143,18 @@ def main():
             if not src:
                 print(f"[건너뜀] PDF가 없습니다: {report}")
                 continue
-            file = parse(stem)[1]["file"]
-            key = key or secret_key()
-            upload(src, file, key)
-            print(f"[보관함] {file}  <-  {src.relative_to(STOCK).as_posix()}")
+            meta = parse(stem)[1]
+            keep = PUBLISHED / f"{code}_{name}" / meta["reportType"] / f"{stem}.pdf"
+            keep.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, keep)
+            print(f"[Published] {keep.relative_to(SITE.parent).as_posix()}  <-  {src.relative_to(STOCK).as_posix()}")
+            r2_put(meta["file"], src)
+            print(f"[R2] {meta['file']}")
             doc = (STOCK / report).with_suffix(".docx")
             h = headline(doc) if doc.is_file() else None
             entry.write_text(json.dumps({"headline": h} if h else {}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             print(f"[목록] reports/{entry.name}" + (f"  제목: {h}" if h else "  (제목을 찾지 못함: 기본 이름으로 표시)"))
+            prune(code, meta["reportType"])
 
 
 if __name__ == "__main__":

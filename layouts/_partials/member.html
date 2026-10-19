@@ -9,6 +9,7 @@ window.DEMETER = {
   url: {{ $sb.url }},
   key: {{ $sb.key }},
   bucket: {{ $sb.bucket }},
+  worker: {{ site.Params.cloudflare.worker | default "" }},
   login: {{ "login/" | relURL }},
   home: {{ "" | relURL }},
   gated: {{ $gated }},
