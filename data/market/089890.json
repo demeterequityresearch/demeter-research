@@ -1,0 +1,101 @@
+{
+ "code": "089890",
+ "price": {
+  "asof": "2026-10-19",
+  "close": 31500,
+  "change": 1500,
+  "change_pct": 5,
+  "open": 28600,
+  "high": 32200,
+  "low": 28100,
+  "prev_close": 30000,
+  "volume": 189497,
+  "value": 5926010750,
+  "mktcap": 522426303000,
+  "shares": 16584962,
+  "hi52": 51400,
+  "lo52": 15830
+ },
+ "updated": "2026-10-20",
+ "holders": {
+  "holders": [
+   {
+    "name": "박명순 외 1인",
+    "shares": 8253578,
+    "pct": 49.76
+   }
+  ],
+  "asof": "2026 반기보고서",
+  "source": "DART 최대주주 현황"
+ },
+ "valuation": {
+  "eps": 796,
+  "eps_basis": "2025",
+  "per": 39.6,
+  "bps": 5765,
+  "bps_basis": "2026 2Q 누적",
+  "pbr": 5.46
+ },
+ "financials": [
+  {
+   "period": "2023",
+   "fs": "별도",
+   "revenue": 957,
+   "op": 80,
+   "net": 70,
+   "op_margin": 8.4,
+   "net_margin": 7.3,
+   "debt_ratio": 49.2,
+   "net_debt_ratio": 14.6,
+   "interest_cover": null,
+   "cfo": -150,
+   "cfi": -20,
+   "cff": 118
+  },
+  {
+   "period": "2024",
+   "fs": "연결",
+   "revenue": 692,
+   "op": -56,
+   "net": -2,
+   "op_margin": -8.1,
+   "net_margin": -0.3,
+   "debt_ratio": 41.3,
+   "net_debt_ratio": 1.2,
+   "interest_cover": null,
+   "cfo": 131,
+   "cfi": 10,
+   "cff": -92
+  },
+  {
+   "period": "2025",
+   "fs": "연결",
+   "revenue": 824,
+   "op": 174,
+   "net": 132,
+   "op_margin": 21.1,
+   "net_margin": 16.0,
+   "debt_ratio": 24.6,
+   "net_debt_ratio": null,
+   "interest_cover": null,
+   "cfo": 156,
+   "cfi": -33,
+   "cff": -100
+  },
+  {
+   "period": "2026 2Q 누적",
+   "fs": "연결",
+   "revenue": 312,
+   "op": 72,
+   "net": 62,
+   "op_margin": 23.1,
+   "net_margin": 19.9,
+   "debt_ratio": 70.0,
+   "net_debt_ratio": -27.7,
+   "interest_cover": null,
+   "cfo": -6,
+   "cfi": -4,
+   "cff": 269
+  }
+ ]
+}
