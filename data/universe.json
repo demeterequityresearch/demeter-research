@@ -1,0 +1,4 @@
+{
+ "_note": "리포트가 없어도 회사 페이지(시세·재무·회사 정보)를 만들 종목 목록 (2026-10-21). code·name·market(KOSPI/KOSDAQ)·corp_code(DART 고유번호). 리포트가 있는 종목은 적지 않아도 됨. 범위는 사용자 결정 전까지 비워 둠. 쓰는 곳: scripts/convert.py, scripts/market.py, layouts/companies/list.html",
+ "companies": []
+}

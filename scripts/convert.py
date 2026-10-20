@@ -9,12 +9,14 @@ reports/ 에는 표준 파일명의 작은 .json(제목 정보)만 남깁니다.
       20261115_코세스_089890_QR_2026Q3.json  ->  '코세스 2026 3Q 실적 리뷰', /reports/20261115-089890-qr-2026q3/
 .json 내용: {"headline": "리포트 첫 장의 헤드라인"} ('주제: 설명'이면 콜론 앞이 제목, 뒤가 부제)
 회사마다 회사 페이지(/companies/<종목코드>/)도 만듭니다. 화면은 layouts/companies/list.html.
+data/universe.json에 적은 종목은 리포트가 없어도 회사 페이지를 만듭니다(시세·재무·회사 정보만, 2026-10-21).
 """
 import json, pathlib, re, shutil
 
 SRC = pathlib.Path("reports")
 DST = pathlib.Path("content/reports")
 COMPANIES = pathlib.Path("content/companies")
+UNIVERSE = pathlib.Path("data/universe.json")
 
 # 사이트에 보이는 이름 (약자 BO/WU/QR는 화면에 쓰지 않음). 회사 페이지의 칸 이름·설명은 hugo.toml의 params.reportTypes
 TYPES = {
@@ -82,14 +84,23 @@ def main():
         companies[meta["code"]] = meta["company"]  # 날짜순이라 가장 늦은 리포트의 회사명이 남음
         print(f"converted: {slug}  <-  {f.name}")
 
-    # 회사 페이지: 종목코드마다 하나
+    # 회사 페이지: 종목코드마다 하나. 리포트가 없는 종목은 data/universe.json에서
+    with_reports = set(companies)
+    if UNIVERSE.is_file():
+        for c in json.loads(UNIVERSE.read_text(encoding="utf-8")).get("companies", []):
+            companies.setdefault(c["code"], c["name"])
     for code, name in sorted(companies.items()):
         (COMPANIES / code).mkdir()
-        # description: 검색엔진·공유 미리보기용 한 줄 (회사 페이지는 로그인 없이 공개, 2026-10-20)
-        desc = f"{name}({code}) 기업 분석·주간 업데이트·실적 리뷰 리포트와 회사 정보"
+        # 검색 결과 제목(seoTitle)·설명(description): 사람들이 찾는 말로, 권유처럼 읽히는 말(유망·추천·대장주 등)은 쓰지 않음 (2026-10-21)
+        # 화면의 회사 이름(h1)은 title 그대로
+        seo = f"{name}({code}) 주가·실적·사업 분석"
+        desc = f"{name}({code}) 주가 차트, 실적·재무정보, 주요주주, 사업 구성"
+        if code in with_reports:
+            desc += "과 기업 분석·주간 업데이트·실적 리뷰 리포트"
+        meta = {"title": name, "code": code, "seoTitle": seo, "description": desc}
         (COMPANIES / code / "_index.md").write_text(
-            f'---\ntitle: "{name}"\ncode: "{code}"\ndescription: "{desc}"\n---\n', encoding="utf-8")
-        print(f"company page: {code} {name}")
+            "---\n" + "".join(f"{k}: {json.dumps(v, ensure_ascii=False)}\n" for k, v in meta.items()) + "---\n", encoding="utf-8")
+        print(f"company page: {code} {name}{'' if code in with_reports else ' (리포트 없음)'}")
 
 
 if __name__ == "__main__":

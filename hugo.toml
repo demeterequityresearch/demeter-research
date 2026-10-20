@@ -3,6 +3,10 @@ languageCode = "ko-kr"
 title = "Alpha Insight"
 theme = "PaperMod"
 
+# 검색엔진(2026-10-21): robots.txt에 사이트맵 주소(sitemap.xml)를 적어 알림. 쓰지 않는 태그·분류 페이지는 만들지 않음(사이트맵에서도 빠짐)
+enableRobotsTXT = true
+disableKinds = ["taxonomy", "term"]
+
 # 마크다운 안의 HTML(iframe, 소개·리서치 방법 페이지의 레이아웃) 허용
 [markup.goldmark.renderer]
   unsafe = true
@@ -58,6 +62,13 @@ theme = "PaperMod"
     workerName = "demeter-reports"
     worker = "https://demeter-reports.demeter-equityresearch.workers.dev"
     allowedOrigins = "https://alphainsight.co.kr,https://www.alphainsight.co.kr,https://demeterequityresearch.github.io"
+
+  # 검색엔진 소유 확인(2026-10-21): 구글 서치 콘솔·네이버 서치어드바이저에서 받은 확인 코드(공개값)를 넣으면
+  # 모든 페이지 <head>에 확인 태그가 들어감(테마 head.html). 등록·로그인은 사용자가 직접
+  [params.analytics.google]
+    SiteVerificationTag = ""
+  [params.analytics.naver]
+    SiteVerificationTag = ""
 
   # 면책 고지(모든 페이지 바닥글)는 data/disclaimer.json (원본 report_utils.DISCLAIMER_TEXT, scripts/publish.py가 옮김)
 

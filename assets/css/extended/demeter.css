@@ -1713,6 +1713,15 @@ a.r-co:hover {
         grid-column: 2;
     }
 
+    /* 리포트가 없는 종목(2026-10-21): 왼쪽 리포트 칸이 없으므로 같은 폭 2단으로 채움 */
+    .co-layout.no-reports {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .co-layout.no-reports > section {
+        grid-column: auto;
+    }
+
     .co-reports .filters {
         margin-left: 0;
         margin-right: 0;

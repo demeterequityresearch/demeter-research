@@ -4,7 +4,8 @@ GitHub Actions(.github/workflows/deploy.yml)가 매일 아침 실행합니다. C
 키는 GitHub 저장소의 Actions 비밀값에만 있습니다: KRX_API_KEY(KRX Open API), DART_API_KEY(OpenDART).
 리포트 폴더의 .env와는 별개이고, 키 값은 출력하지 않습니다.
 
-대상: 사이트에 리포트가 있는 회사(reports/*.json의 종목코드). DART 고유번호는 data/companies/<코드>.json의 corp_code.
+대상: 사이트에 리포트가 있는 회사(reports/*.json의 종목코드)와 data/universe.json의 종목(리포트 없이 시세·재무만, 2026-10-21).
+DART 고유번호는 data/companies/<코드>.json의 corp_code, 없으면 data/universe.json의 corp_code.
 만드는 파일
   data/market/<코드>.json    화면 템플릿용 요약: 종가·전일 대비·시세 정보·주요주주·주요 재무정보 (layouts/companies/list.html)
   static/market/<코드>.json  주가 차트용 일별 시세(최근 5년): [날짜, 종가, 고가, 저가, 거래량] (static/js/chart.js)
@@ -20,6 +21,7 @@ import json, os, pathlib, sys, time, urllib.parse, urllib.request
 SITE = pathlib.Path(__file__).resolve().parent.parent
 REPORTS = SITE / "reports"
 COMPANIES = SITE / "data" / "companies"
+UNIVERSE = SITE / "data" / "universe.json"
 SUMMARY = SITE / "data" / "market"
 SERIES = SITE / "static" / "market"
 YEARS = 5
@@ -314,13 +316,16 @@ def main():
     if not krx_key and not dart_key:
         sys.exit("KRX_API_KEY·DART_API_KEY가 없습니다 (GitHub 저장소 Settings → Secrets and variables → Actions)")
     only = sys.argv[1:]
-    codes = sorted({f.stem.split("_")[2] for f in REPORTS.glob("*.json") if len(f.stem.split("_")) > 3})
+    universe = {}
+    if UNIVERSE.is_file():
+        universe = {c["code"]: c for c in json.loads(UNIVERSE.read_text(encoding="utf-8")).get("companies", [])}
+    codes = sorted({f.stem.split("_")[2] for f in REPORTS.glob("*.json") if len(f.stem.split("_")) > 3} | set(universe))
     targets = {}
     for code in codes:
         if only and code not in only:
             continue
         info_f = COMPANIES / f"{code}.json"
-        info = json.loads(info_f.read_text(encoding="utf-8")) if info_f.is_file() else {}
+        info = json.loads(info_f.read_text(encoding="utf-8")) if info_f.is_file() else universe.get(code, {})
         targets[code] = info
     SUMMARY.mkdir(parents=True, exist_ok=True)
     SERIES.mkdir(parents=True, exist_ok=True)

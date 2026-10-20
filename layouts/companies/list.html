@@ -6,10 +6,12 @@
          (scripts/market.py가 매일 아침 KRX·DART에서 만듦). 파일이 없으면 그 칸을 감춤
          휴대폰은 최신 리포트 → 리포트 목록 → 회사 정보 순으로 쌓고, 데스크톱(861px 이상)은 2단
          회사 정보는 data/companies/<코드>.json (scripts/publish.py가 profile.json에서 공개 항목만 골라 씀)
+         리포트가 없는 종목(data/universe.json, 2026-10-21): 회사 정보는 universe 항목(이름·시장)으로 대신하고, 최신 리포트 카드·리포트 목록을 감추고 시세·재무만, 데스크톱은 같은 폭 2단
        /companies/ : 회사 목록. 페이지 원본은 scripts/convert.py가 리포트에서 만든다 */ -}}
 {{- if .Params.code }}
 {{- $code := .Params.code }}
 {{- $info := index site.Data.companies $code }}
+{{- if not $info }}{{ range where (site.Data.universe.companies | default slice) "code" $code }}{{ $info = . }}{{ end }}{{ end }}
 {{- $reports := (where (where site.RegularPages "Section" "reports") "Params.code" $code).ByDate.Reverse }}
 {{- $mk := index site.Data.market $code }}
 {{- $px := cond (ne $mk nil) (index (default dict $mk) "price") nil }}
@@ -74,7 +76,8 @@
   <script src="{{ "js/chart.js" | relURL }}?v={{ now.Format "200601021504" }}" defer></script>
   {{- end }}
 
-  <div class="co-layout">
+  <div class="co-layout{{ if not $reports }} no-reports{{ end }}">
+    {{- if $reports }}
     {{- /* 최신 리포트: 종류와 상관없이 가장 최근 1건 */ -}}
     <section class="bo-card" aria-label="최신 리포트">
       {{- with index $reports 0 }}
@@ -100,8 +103,9 @@
         {{- range $reports }}{{ partial "report-row.html" (dict "page" . "withCompany" false "withType" true) }}{{ end }}
       </ul>
       <button type="button" class="more-btn" data-more-btn hidden>더 보기</button>
-      <p class="co-empty" data-empty{{ if $reports }} hidden{{ end }}>이 종류의 리포트는 아직 발간되지 않았습니다.</p>
+      <p class="co-empty" data-empty hidden>이 종류의 리포트는 아직 발간되지 않았습니다.</p>
     </section>
+    {{- end }}
 
     {{- with $info }}
     <section class="co-profile" id="profile" aria-labelledby="profile-h">
@@ -183,10 +187,11 @@
       <ul class="peer-list">
         {{- range . }}
         {{- $pg := cond (ne .code nil) (site.GetPage (printf "/companies/%v" .code)) nil }}
+        {{- $hasRep := and $pg (where (where site.RegularPages "Section" "reports") "Params.code" (printf "%v" .code)) }}
         <li>
           {{- if $pg }}<a href="{{ $pg.RelPermalink }}">{{ .name }}</a>{{ else }}<span>{{ .name }}</span>{{ end }}
           <small>{{ .code }}{{ with .market }} · {{ . }}{{ end }}</small>
-          {{- if $pg }}<span class="peer-tag">리포트 있음</span>{{ end }}
+          {{- if $hasRep }}<span class="peer-tag">리포트 있음</span>{{ end }}
         </li>
         {{- end }}
       </ul>
@@ -198,7 +203,7 @@
 </div>
 {{- else }}
 <div class="view">
-  <div class="page-head"><h1>기업</h1><p>리포트가 있는 기업입니다.</p></div>
+  <div class="page-head"><h1>기업</h1><p>사이트에 있는 기업 목록입니다.</p></div>
   <div class="coverage start">
     {{- range .Sections.ByTitle }}
     <a href="{{ .RelPermalink }}">{{ .Title }}<small>{{ .Params.code }}</small></a>
