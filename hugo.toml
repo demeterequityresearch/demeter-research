@@ -20,6 +20,9 @@ theme = "PaperMod"
   ShowToc = false
   mainSections = ["reports"]
 
+  # 이용약관(content/terms.md) 시행일. 약관을 바꾸면 함께 고침: 가입할 때 회원 정보(user_metadata.terms_agreed)에 이 날짜를 남김
+  termsDate = "2026-10-21"
+
   # 사이트 아이콘(static/images/logo.png, 파비콘과 같은 "a." 모양). 상단 로고는 header.html의 글자 로고
   [params.label]
     icon = "images/logo.png"

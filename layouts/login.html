@@ -19,7 +19,7 @@
       </label>
       <label class="auth-check" id="f-agree" hidden>
         <input type="checkbox" name="agree">
-        <span><a href="{{ "privacy/" | relLangURL }}" target="_blank" rel="noopener">개인정보처리방침</a>에 동의합니다 (필수)</span>
+        <span>만 14세 이상이며 <a href="{{ "terms/" | relLangURL }}" target="_blank" rel="noopener">이용약관</a>과 <a href="{{ "privacy/" | relLangURL }}" target="_blank" rel="noopener">개인정보처리방침</a>에 동의합니다 (필수)</span>
       </label>
       <button type="submit" class="auth-btn" id="auth-btn">로그인</button>
     </form>
@@ -106,7 +106,7 @@
     var d = MODES[mode];
     if (!d.noEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('이메일 주소를 확인해 주세요.', true);
     if (d.pass && pw.length < 8) return say('비밀번호는 8자 이상으로 정해 주세요.', true);
-    if (d.agree && !form.agree.checked) return say('개인정보처리방침에 동의해 주세요.', true);
+    if (d.agree && !form.agree.checked) return say('이용약관과 개인정보처리방침에 동의해 주세요.', true);
 
     busy = true; btn.disabled = true; say('처리 중입니다…');
     var job;
@@ -116,7 +116,7 @@
         goNext();
       });
     } else if (mode === 'signup') {
-      job = sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: back() } }).then(function (r) {
+      job = sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: back(), data: { terms_agreed: {{ site.Params.termsDate }} } } }).then(function (r) {
         if (r.error) throw r.error;
         // 이미 인증까지 마친 주소면 Supabase는 오류 없이 identities가 빈 계정을 돌려주고 메일을 보내지 않음
         var u = r.data && r.data.user;
