@@ -1,18 +1,18 @@
 {
  "code": "066970",
  "price": {
-  "asof": "2026-10-19",
-  "close": 100500,
-  "change": 6800,
-  "change_pct": 7.26,
-  "open": 89100,
-  "high": 100900,
-  "low": 88400,
-  "prev_close": 93700,
-  "volume": 631062,
-  "value": 61239201650,
-  "mktcap": 4088961492000,
-  "shares": 40686184,
+  "asof": "2026-10-20",
+  "close": 99100,
+  "change": -1400,
+  "change_pct": -1.39,
+  "open": 100800,
+  "high": 105000,
+  "low": 98500,
+  "prev_close": 100500,
+  "volume": 625851,
+  "value": 63736061200,
+  "mktcap": 4032116682300,
+  "shares": 40687353,
   "hi52": 225000,
   "lo52": 63000
  },
@@ -35,12 +35,12 @@
   "source": "DART 최대주주 현황"
  },
  "valuation": {
-  "eps": -13114,
+  "eps": -13113,
   "eps_basis": "2025",
   "per": null,
   "bps": 19073,
   "bps_basis": "2026 2Q 누적",
-  "pbr": 5.27
+  "pbr": 5.2
  },
  "financials": [
   {

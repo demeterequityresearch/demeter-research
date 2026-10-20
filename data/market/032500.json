@@ -1,17 +1,17 @@
 {
  "code": "032500",
  "price": {
-  "asof": "2026-10-19",
-  "close": 18650,
-  "change": 1030,
-  "change_pct": 5.85,
-  "open": 16920,
-  "high": 18650,
-  "low": 16850,
-  "prev_close": 17620,
-  "volume": 122885,
-  "value": 2246092310,
-  "mktcap": 786875223650,
+  "asof": "2026-10-20",
+  "close": 18400,
+  "change": -250,
+  "change_pct": -1.34,
+  "open": 18830,
+  "high": 18990,
+  "low": 17860,
+  "prev_close": 18650,
+  "volume": 152147,
+  "value": 2814532860,
+  "mktcap": 776327298400,
   "shares": 42191701,
   "hi52": 40000,
   "lo52": 12100
@@ -35,7 +35,7 @@
   "per": null,
   "bps": 3551,
   "bps_basis": "2026 2Q 누적",
-  "pbr": 5.25
+  "pbr": 5.18
  },
  "financials": [
   {
