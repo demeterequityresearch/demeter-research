@@ -2,9 +2,14 @@
    - ul[data-more="N"]: 처음엔 N개만, 바로 다음의 [data-more-btn] 버튼으로 N개씩 더 보임
    - [data-filters] 거르기 버튼(data-f="all|BO|WU|QR")이 같은 묶음([data-filter-scope]) 안 목록의 .row/.card를 거름 */
 (function () {
-  // 상단 바 높이(휴대폰은 메뉴가 두 줄일 수 있음) → 홈 첫 화면 높이 계산에 씀
+  // 홈 첫 화면 높이 계산: 상단 바 높이(휴대폰은 메뉴가 두 줄일 수 있음)와 바닥글 'DISCLAIMER' 제목 줄 아래까지의 높이
   var nav = document.querySelector('.site-nav');
-  function navH() { if (nav) document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px'); }
+  var footH = document.querySelector('.site-foot h2');
+  function navH() {
+    var root = document.documentElement.style;
+    if (nav) root.setProperty('--nav-h', nav.offsetHeight + 'px');
+    if (footH) root.setProperty('--foot-peek', Math.ceil(footH.getBoundingClientRect().bottom - footH.closest('.site-foot').getBoundingClientRect().top + 10) + 'px');
+  }
   navH();
   window.addEventListener('resize', navH);
   if (window.ResizeObserver && nav) new ResizeObserver(navH).observe(nav);

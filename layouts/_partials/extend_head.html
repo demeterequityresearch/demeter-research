@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {{- partial "member.html" . }}
-{{- /* 회사 검색(홈·상단 바), 목록 '더 보기'·거르기 버튼 */}}
-<script src="{{ "js/search.js" | relURL }}" defer></script>
-<script src="{{ "js/site.js" | relURL }}" defer></script>
+{{- /* 회사 검색(홈·상단 바), 목록 '더 보기'·거르기 버튼. ?v=빌드 시각: 배포할 때마다 브라우저가 새 파일을 받게 함 */}}
+{{- $v := now.Format "200601021504" }}
+<script src="{{ "js/search.js" | relURL }}?v={{ $v }}" defer></script>
+<script src="{{ "js/site.js" | relURL }}?v={{ $v }}" defer></script>

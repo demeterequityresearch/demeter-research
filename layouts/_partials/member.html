@@ -35,4 +35,4 @@ if (/(^#|&)(type=(recovery|signup|invite|magiclink|email_change)|error_code=)/.t
 {{- end }}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js" defer></script>
-<script src="{{ "js/member.js" | relURL }}" defer></script>
+<script src="{{ "js/member.js" | relURL }}?v={{ now.Format "200601021504" }}" defer></script>

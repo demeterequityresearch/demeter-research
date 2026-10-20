@@ -9,6 +9,7 @@ description: "알파인사이트(Alpha Insight) 문의 안내입니다."
 <p class="mail">contact@alphainsight.co.kr</p>
 <dl>
 <div><dt>리포트 관련</dt><dd>내용 의견, 숫자·표기 오류 제보</dd></div>
+<div><dt>커버리지 요청</dt><dd>분석해 주었으면 하는 종목 추가 요청</dd></div>
 <div><dt>회원 관련</dt><dd>가입·로그인·비밀번호 문제</dd></div>
 <div><dt>제휴·기타</dt><dd>콘텐츠 제휴, 인용·전재 문의</dd></div>
 </dl>

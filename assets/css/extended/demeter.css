@@ -228,13 +228,13 @@ h3 {
 }
 
 /* ── 홈: 검색 ── */
-/* 첫 화면: 검색창이 가운데, 바닥글 Disclaimer는 맨 아래에 상단 바 높이만큼만 보이게 (화면 크기와 상관없이, 2026-10-20)
-   높이 = 화면 높이 - 상단 바(--nav-h, site.js가 잼) - 바닥글 보이는 부분(상단 바와 같은 높이) */
+/* 첫 화면: 검색창이 가운데, 바닥글은 맨 아래에 'DISCLAIMER' 제목 줄까지만 보이게 (화면 크기와 상관없이, 2026-10-20)
+   높이 = 화면 높이 - 상단 바(--nav-h) - 바닥글 제목 줄 아래까지(--foot-peek). 두 값은 static/js/site.js가 잼 */
 .home {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: calc(100svh - 2 * var(--nav-h, 64px));
+    min-height: calc(100svh - var(--nav-h, 64px) - var(--foot-peek, 72px));
     padding-block: 24px;
 }
 
@@ -917,8 +917,7 @@ a.r-co:hover {
 /* ── 소개 ── */
 .about-text {
     display: grid;
-    gap: 16px;
-    max-width: 46em;
+    gap: 16px;              /* 폭 제한 없음: 아래 Research Methodology 상자와 같은 폭까지 (2026-10-20) */
 }
 
 .about-text p,
@@ -1132,7 +1131,7 @@ a.r-co:hover {
 
 .contact dl div {
     display: grid;
-    grid-template-columns: 6.5em minmax(0, 1fr);
+    grid-template-columns: 7em minmax(0, 1fr);
     gap: 10px;
 }
 
