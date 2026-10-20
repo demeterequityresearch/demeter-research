@@ -14,7 +14,7 @@
     --gold-text: #87642F;   /* 밝은 바탕 위 금색 글자 */
     --chip: #E6EBE6;
     --font-mark: "Manrope", "IBM Plex Sans KR", sans-serif;
-    --font-head: "Gowun Batang", "Nanum Myeongjo", "Batang", serif;
+    --font-head: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;  /* 제목도 고딕(2026-10-20, 명조 Gowun Batang에서 바꿈) */
     --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-data: "IBM Plex Mono", "Consolas", monospace;
     --gutter-l: max(16px, env(safe-area-inset-left, 0px));
@@ -475,10 +475,6 @@ h3 {
     border-bottom: 1px solid var(--rule);
 }
 
-.with-co .row {
-    grid-template-columns: 7.2em 9em 1fr;
-}
-
 .row[hidden] {
     display: none;
 }
@@ -563,6 +559,187 @@ a.r-co:hover {
     color: var(--bg);
     background: var(--green);
     border-color: var(--green);
+}
+
+/* ── 리포트 목록(/reports/) 카드형 줄 (2026-10-20) ──
+   휴대폰: 배지·회사 / 종류·날짜 / 제목 (부제 감춤)   데스크톱: 배지 | 회사·코드 | 종류·날짜 / 제목 / 부제 */
+/* 거르기 버튼: 휴대폰은 한 줄로 두고 가로로 밀어 넘김 */
+[data-filter-scope] > .filters {
+    flex-wrap: nowrap;
+    margin-left: calc(-1 * var(--gutter-l));
+    margin-right: calc(-1 * var(--gutter-r));
+    padding: 0 var(--gutter-r) 0 var(--gutter-l);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+[data-filter-scope] > .filters button {
+    flex: none;
+    min-height: 38px;
+}
+
+@media (min-width: 861px) {
+    [data-filter-scope] > .filters {
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0;
+    }
+}
+
+.item-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 12px;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+}
+
+.item[hidden] {
+    display: none;
+}
+
+.mono {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 16px;
+    color: #EDE6D6;
+    background: #0E3B30;
+}
+
+.mono.m1 {
+    background: #2F5D50;
+}
+
+.mono.m2 {
+    background: #87642F;
+}
+
+.i-co {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    min-width: 0;
+}
+
+.i-co a,
+.i-co b {
+    font-size: 15.5px;
+    font-weight: 600;
+}
+
+.i-co a:hover {
+    color: var(--gold-text);
+}
+
+.i-co small {
+    font-family: var(--font-data);
+    font-size: 12.5px;
+    color: var(--muted);
+}
+
+.i-body {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.i-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.i-tag {
+    padding: 1px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    background: var(--chip);
+    border-radius: 999px;
+}
+
+.i-tag.t-wu {
+    color: var(--gold-text);
+}
+
+.i-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-data);
+    font-size: 12.5px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.i-date svg {
+    width: 13px;
+    height: 13px;
+}
+
+.i-title {
+    font-size: 16.5px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.i-title:hover {
+    color: var(--gold-text);
+}
+
+.i-sub {
+    display: none;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+@media (min-width: 861px) {
+    .item {
+        grid-template-columns: 52px 150px minmax(0, 1fr);
+        gap: 0 18px;
+        padding: 16px 20px;
+    }
+
+    .mono {
+        width: 52px;
+        height: 52px;
+        font-size: 18px;
+    }
+
+    .i-co {
+        display: grid;
+        gap: 0;
+        align-self: stretch;
+        align-content: center;
+        padding-right: 18px;
+        border-right: 1px solid var(--rule);
+    }
+
+    .i-body {
+        grid-column: 3;
+    }
+
+    .i-sub {
+        display: block;
+    }
 }
 
 /* ── 리포트 한 편 ── */
@@ -738,50 +915,15 @@ a.r-co:hover {
 }
 
 /* ── 소개 ── */
-.about-grid {
-    display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    gap: 48px;
-}
-
-.about-grid > * {
-    min-width: 0;
-}
-
 .about-text {
     display: grid;
     gap: 16px;
-    max-width: 36em;
+    max-width: 46em;
 }
 
 .about-text p,
 .series p,
-.steps p,
-.principles p {
-    margin: 0;
-}
-
-.facts-list {
-    display: grid;
-    margin: 0;
-    border-top: 1px solid var(--rule);
-}
-
-.facts-list div {
-    display: grid;
-    grid-template-columns: 7.5em 1fr;
-    gap: 16px;
-    padding-block: 14px;
-    border-bottom: 1px solid var(--rule);
-}
-
-.facts-list dt {
-    padding-top: 2px;
-    font-size: 13px;
-    color: var(--muted);
-}
-
-.facts-list dd {
+.rm p {
     margin: 0;
 }
 
@@ -842,60 +984,169 @@ a.r-co:hover {
     color: var(--green);
 }
 
-/* ── 리서치 방법 ── */
-.steps {
+/* Research Methodology (소개 페이지, 2026-10-20): 휴대폰은 세로 목록, 데스크톱은 가로 다섯 칸을 금색 선으로 이음 */
+.rm {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 48px;
+    padding: 26px 20px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+}
+
+.rm-head {
+    display: grid;
+    gap: 6px;
+}
+
+.rm h2 {
+    margin: 0;
+    font-family: var(--font-mark);
+    font-weight: 800;
+    font-size: clamp(24px, 4vw, 32px);
+    letter-spacing: -.02em;
+}
+
+.rm-head p {
+    color: var(--muted);
+    font-size: 15px;
+}
+
+.rm-flow {
+    display: grid;
     margin: 0;
     padding: 0;
     list-style: none;
-    counter-reset: s;
-    border-top: 1px solid var(--rule);
 }
 
-.steps li {
+.rm-step {
+    position: relative;
     display: grid;
-    align-content: start;
-    gap: 6px;
-    min-width: 0;
-    padding: 22px 24px 24px 0;
-    border-bottom: 1px solid var(--rule);
-    counter-increment: s;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 2px 14px;
+    padding: 16px 0;
 }
 
-.steps li::before {
-    content: counter(s, decimal-leading-zero);
-    font-family: var(--font-data);
-    font-size: 13px;
+.rm-step + .rm-step {
+    border-top: 1px dashed var(--rule);
+}
+
+.rm-ico {
+    grid-row: span 3;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    color: var(--green);
+    background: var(--chip);
+}
+
+.rm-ico svg {
+    width: 26px;
+    height: 26px;
+}
+
+.rm-key {
+    font-family: var(--font-mark);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
     color: var(--gold-text);
 }
 
-.steps h3 {
+.rm-step h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 17px;
 }
 
-.steps p {
+.rm-step p {
     font-size: 14.5px;
     color: var(--muted);
 }
 
-.principles {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px 40px;
-    margin-top: 40px;
+@media (min-width: 861px) {
+    .rm {
+        padding: 34px 34px 30px;
+    }
+
+    .rm-flow {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .rm-step {
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+        padding: 0;
+    }
+
+    .rm-step + .rm-step {
+        border-top: 0;
+    }
+
+    .rm-ico {
+        grid-row: auto;
+        margin-bottom: 8px;
+    }
+
+    .rm-step:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 26px;
+        left: 64px;
+        right: -10px;
+        border-top: 1px solid var(--gold);
+        opacity: .6;
+    }
 }
 
-.principles p {
-    padding-left: 16px;
-    border-left: 2px solid var(--gold);
+/* ── Contact (2026-10-20) ── */
+.contact {
+    display: grid;
+    gap: 14px;
+    max-width: 640px;
+}
+
+.contact p {
+    margin: 0;
+}
+
+.contact .mail {
+    padding: 14px 16px;
+    font-family: var(--font-data);
+    font-size: 16.5px;
+    background: var(--chip);
+    border-radius: 10px;
+    overflow-wrap: anywhere;
+}
+
+.contact dl {
+    display: grid;
+    gap: 8px;
+    margin: 0;
     font-size: 15px;
 }
 
-.principles strong {
-    display: block;
-    font-weight: 600;
+.contact dl div {
+    display: grid;
+    grid-template-columns: 6.5em minmax(0, 1fr);
+    gap: 10px;
+}
+
+.contact dt {
+    color: var(--muted);
+}
+
+.contact dd {
+    margin: 0;
+}
+
+.contact-note {
+    font-size: 13.5px;
+    color: var(--muted);
 }
 
 /* ── 면책 바닥글 ── */
@@ -946,19 +1197,11 @@ a.r-co:hover {
 
 /* ── 좁은 화면 ── */
 @media (max-width: 860px) {
-    .about-grid {
-        grid-template-columns: 1fr;
-        gap: 32px;
-    }
-
-    .series,
-    .steps,
-    .principles {
+    .series {
         grid-template-columns: 1fr;
     }
 
-    .row,
-    .with-co .row {
+    .row {
         grid-template-columns: 1fr;
         gap: 4px 12px;
     }
@@ -984,11 +1227,6 @@ a.r-co:hover {
     .site-nav ul {
         gap: 18px;
         font-size: 14px;
-    }
-
-    .facts-list div {
-        grid-template-columns: 1fr;
-        gap: 2px;
     }
 
     .search-field {
