@@ -14,3 +14,8 @@ reports/*.pdf
 reports/*.docx
 # Supabase secret key (리포트 올릴 때만 씀)
 .secrets.env
+
+# 부서 승인 대기·병목 기록(내부용, 2026-10-21)
+PENDING.md
+# 작업 지침(내부용, 2026-10-21 사용자 결정으로 공개 저장소에서 뺌. 파일은 로컬에 둠)
+CLAUDE.md
