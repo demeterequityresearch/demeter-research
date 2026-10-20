@@ -146,11 +146,12 @@
 
     {{- with $mk }}{{ with .financials }}
     {{- $fin := . }}
+    {{- $fs := (index $fin (sub (len $fin) 1)).fs }}
     <section class="co-fin" aria-labelledby="fin-h">
       <h2 id="fin-h">주요 재무정보 <small>억원</small></h2>
       <div class="tbl-wrap">
         <table class="mini-tbl fin">
-          <thead><tr><th></th>{{ range $fin }}<th>{{ .period }}</th>{{ end }}</tr></thead>
+          <thead><tr><th></th>{{ range $fin }}<th>{{ .period }}{{ if ne .fs $fs }}<small class="fs-tag">{{ .fs }}</small>{{ end }}</th>{{ end }}</tr></thead>
           <tbody>
             {{- range slice (slice "매출액" "revenue" "n") (slice "영업이익" "op" "n") (slice "순이익" "net" "n") (slice "영업이익률" "op_margin" "p") (slice "순이익률" "net_margin" "p") }}
             {{- $row := . }}
@@ -169,7 +170,7 @@
           </tbody>
         </table>
       </div>
-      <p class="co-note">DART 재무제표({{ (index $fin 0).fs }}) 기준. 분기는 연초부터 누적. 순부채비율 = (차입금·사채 − 현금성자산) ÷ 자본, 이자보상배율 = 영업이익 ÷ 이자비용으로 단순 계산</p>
+      <p class="co-note">DART {{ $fs }} 재무제표 기준(연결 재무제표가 없는 해는 별도로 표시). 분기는 연초부터 누적. 순부채비율 = (차입금·사채 − 현금성자산) ÷ 자본, 이자보상배율 = 영업이익 ÷ 이자비용으로 단순 계산</p>
     </section>
     {{- end }}{{ end }}
 

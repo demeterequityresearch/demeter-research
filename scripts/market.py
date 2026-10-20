@@ -65,7 +65,7 @@ def krx_day(key, market, day):
 
 
 def update_prices(key, targets):
-    """targets: {코드: 시장}. static/market/<코드>.json의 일별 시세를 오늘까지 채움"""
+    """targets: 종목코드 목록. static/market/<코드>.json의 일별 시세를 오늘까지 채움 (처음 보는 종목은 5년치)"""
     today = dt.date.today()
     start_new = today - dt.timedelta(days=365 * YEARS + 10)
     hist, need_from = {}, {}
@@ -78,18 +78,20 @@ def update_prices(key, targets):
     day = min(need_from.values())
     calls = 0
     while day <= today:
-        if day.weekday() < 5:  # 주말은 건너뜀 (공휴일은 빈 응답)
-            for market in sorted({m for c, m in targets.items() if need_from[c] <= day}):
-                rows = krx_day(key, market, day)
+        if day.weekday() < 5 and any(need_from[c] <= day for c in targets):  # 주말은 건너뜀 (공휴일은 빈 응답)
+            # 시장을 옮긴 종목(예: 엘앤에프 2024.01 코스닥 → 코스피)도 있으므로 두 시장을 모두 보고 종목코드로 찾음
+            rows = {}
+            for market in KRX_SERVICES:
+                rows.update(krx_day(key, market, day))
                 calls += 1
-                for code, m in targets.items():
-                    r = rows.get(code)
-                    if m == market and need_from[code] <= day and r and num(r.get("TDD_CLSPRC")):
+                time.sleep(0.15)
+            for code in targets:
+                r = rows.get(code)
+                if need_from[code] <= day and r and num(r.get("TDD_CLSPRC")):
                         hist[code].append([day.isoformat(), num(r["TDD_CLSPRC"]), num(r.get("TDD_HGPRC")),
                                            num(r.get("TDD_LWPRC")), num(r.get("ACC_TRDVOL")),
                                            {k: r.get(k) for k in ("TDD_OPNPRC", "CMPPREVDD_PRC", "FLUC_RT", "ACC_TRDVAL",
-                                                                  "MKTCAP", "LIST_SHRS", "ISU_NM")}])
-                time.sleep(0.15)
+                                                                  "MKTCAP", "LIST_SHRS", "ISU_NM", "MKT_NM")}])
         day += dt.timedelta(days=1)
     print(f"[KRX] 호출 {calls}회")
     cut = (today - dt.timedelta(days=365 * YEARS + 10)).isoformat()
@@ -140,6 +142,13 @@ def latest_reports(today):
     return out
 
 
+def holder_key(name):
+    """주주 이름 비교용: '(주)', '주식회사', 띄어쓰기를 뺌"""
+    for t in ("(주)", "㈜", "주식회사", " "):
+        name = name.replace(t, "")
+    return name
+
+
 def shareholders(key, corp, today):
     """최대주주 및 특수관계인 합계 + 5% 이상 대량보유자 (가장 최근 정기보고서·보고 기준)"""
     out = {"holders": [], "asof": None, "source": None}
@@ -161,12 +170,12 @@ def shareholders(key, corp, today):
         out["asof"] = f"{y} {REPRT[rc]}"
         out["source"] = "DART 최대주주 현황"
         break
-    seen = {h["name"].split(" 외 ")[0] for h in out["holders"]}
+    seen = {holder_key(h["name"].split(" 외 ")[0]) for h in out["holders"]}
     for r in dart(key, "majorstock.json", corp_code=corp):  # 대량보유 상황보고: 보고자별 가장 최근 것
         name = (r.get("repror") or "").strip()
-        if not name or name in seen:
+        if not name or holder_key(name) in seen:
             continue
-        seen.add(name)
+        seen.add(holder_key(name))
         pct = num(r.get("stkrt"))
         if pct and pct >= 5:
             out["holders"].append({"name": name, "shares": num(r.get("stkqy")), "pct": pct,
@@ -194,6 +203,8 @@ ACCOUNTS = {
     "cff": ["ifrs-full_CashFlowsFromUsedInFinancingActivities"],
 }
 SUM = {"borrow"}  # 여러 계정을 더하는 것
+# 표준 계정 ID가 없을 때 계정 이름으로 찾음 (회사마다 '이자비용'을 자체 계정으로 공시하는 경우가 많음)
+NAMES = {"interest": ("이자비용",)}
 
 
 def statements(key, corp, year, rc):
@@ -211,6 +222,14 @@ def statements(key, corp, year, rc):
                     v = num(v)
                     if v is not None:
                         vals.append((r.get("sj_div"), v))
+            if not vals and k in NAMES:
+                for r in rows:
+                    nm = (r.get("account_nm") or "").replace(" ", "")
+                    if r.get("sj_div") in ("IS", "CIS") and any(nm.startswith(n) for n in NAMES[k]):
+                        v = num(r.get("thstrm_add_amount") or r.get("thstrm_amount"))
+                        if v is not None:
+                            vals.append((r.get("sj_div"), abs(v)))
+                            break
             if not vals:
                 continue
             if k in SUM:
@@ -308,9 +327,7 @@ def main():
 
     hist = {}
     if krx_key:
-        markets = {c: (i.get("market") or "KOSDAQ").upper() for c, i in targets.items()}
-        markets = {c: (m if m in KRX_SERVICES else "KOSDAQ") for c, m in markets.items()}
-        hist = update_prices(krx_key, markets)
+        hist = update_prices(krx_key, list(targets))
     today = dt.date.today()
     for code, info in targets.items():
         old_f = SUMMARY / f"{code}.json"
