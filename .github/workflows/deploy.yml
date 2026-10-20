@@ -1,12 +1,17 @@
 name: Deploy site
 
+# main에 push할 때 + 매일 아침(시세·재무 갱신, 2026-10-20) + 수동 실행
+# 매일 실행: scripts/market.py가 KRX·DART에서 받아 data/market·static/market을 갱신하고 저장소에 커밋한 뒤 빌드·배포.
+# 이 커밋은 GITHUB_TOKEN으로 push하므로 이 워크플로를 다시 부르지 않음(무한 반복 없음). Claude는 쓰지 않음
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "30 23 * * *"   # 매일 08:30 KST (KRX Open API는 전 거래일 시세를 다음 날 아침에 올림)
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,6 +26,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Update market data
+        if: github.event_name != 'push'
+        env:
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: |
+          if [ -z "$KRX_API_KEY$DART_API_KEY" ]; then echo "키가 아직 없음: 시세 갱신 건너뜀"; exit 0; fi
+          python3 scripts/market.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/market static/market
+          if git diff --cached --quiet; then echo "바뀐 시세 없음"; else
+            git commit -m "Update market data $(date -u +%Y-%m-%d)"
+            git push
+          fi
 
       - name: Install Hugo
         run: |

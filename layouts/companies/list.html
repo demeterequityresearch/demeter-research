@@ -1,8 +1,9 @@
 {{- define "main" }}
 {{- /* /companies/<종목코드>/ : 회사 페이지 (로그인 없이 공개, 2026-10-20 사용자 문서 두 차례로 개편)
          한 페이지(탭 없음): 머리(회사명·종목코드·시장) → 왼쪽 리포트 목록(거르기 버튼은 리포트 목록 페이지와 같음, 10건씩 더 보기)
-         오른쪽: 최신 리포트 카드(종류 상관없이 1건) → 회사 정보 → 사업 구성 → 관련 기업
-         나중에 시세·재무 데이터가 생기면: 머리에 종가, 머리 아래 주가 차트·시세 정보, 오른쪽에 주요주주·주요 재무정보 (_drafts/site_changes.md 24~27번)
+         오른쪽: 최신 리포트 카드(종류 상관없이 1건) → 회사 정보 → 주요주주 → 사업 구성 → 주요 재무정보 → 관련 기업
+         머리의 종가, 머리 아래 주가 차트·시세 정보, 주요주주·주요 재무정보는 data/market/<코드>.json·static/market/<코드>.json
+         (scripts/market.py가 매일 아침 KRX·DART에서 만듦). 파일이 없으면 그 칸을 감춤
          휴대폰은 최신 리포트 → 리포트 목록 → 회사 정보 순으로 쌓고, 데스크톱(861px 이상)은 2단
          회사 정보는 data/companies/<코드>.json (scripts/publish.py가 profile.json에서 공개 항목만 골라 씀)
        /companies/ : 회사 목록. 페이지 원본은 scripts/convert.py가 리포트에서 만든다 */ -}}
@@ -10,13 +11,68 @@
 {{- $code := .Params.code }}
 {{- $info := index site.Data.companies $code }}
 {{- $reports := (where (where site.RegularPages "Section" "reports") "Params.code" $code).ByDate.Reverse }}
+{{- $mk := index site.Data.market $code }}
+{{- $px := cond (ne $mk nil) (index (default dict $mk) "price") nil }}
 <div class="view co-page" data-filter-scope>
   <p class="crumb"><a href="{{ "" | relLangURL }}">홈</a> / <a href="{{ "companies/" | relLangURL }}">기업</a> / {{ .Title }}</p>
   <header class="co-head">
     <h1>{{ .Title }}</h1>
     <span class="co-code">{{ $code }}</span>
     {{- with $info }}{{ with .market }}<span class="co-mkt">{{ . }}</span>{{ end }}{{ end }}
+    {{- with $px }}
+    {{- $dir := cond (gt (float (default 0 .change)) 0) "up" (cond (lt (float (default 0 .change)) 0) "down" "") }}
+    <p class="co-quote">
+      <span class="q-close">{{ lang.FormatNumber 0 .close }}<small>원</small></span>
+      {{- with .change }}<span class="q-chg {{ $dir }}">{{ if gt . 0 }}+{{ end }}{{ lang.FormatNumber 0 . }} ({{ if gt (float $px.change_pct) 0 }}+{{ end }}{{ lang.FormatNumber 2 $px.change_pct }}%)</span>{{ end }}
+      <span class="q-asof">{{ .asof }} 종가 · KRX</span>
+    </p>
+    {{- end }}
   </header>
+
+  {{- /* 주가 차트 + 시세 정보: 매일 아침 전 거래일 종가로 갱신(scripts/market.py). 장중 실시간 아님 */ -}}
+  {{- with $px }}
+  <section class="co-market" aria-label="주가와 시세 정보">
+    <div class="co-chart" data-chart="{{ printf "market/%s.json" $code | relURL }}">
+      <div class="ch-bar">
+        <div class="ch-periods" role="group" aria-label="차트 기간">
+          {{- range slice "1M" "3M" "6M" "1Y" "3Y" "5Y" }}<button type="button" data-period="{{ . }}" aria-pressed="false">{{ . }}</button>{{ end }}
+        </div>
+        <span class="ch-ret"></span>
+      </div>
+      <p class="ch-tip" hidden></p>
+      <div class="ch-plot"></div>
+    </div>
+    <div class="co-stats">
+      {{- if and .hi52 .lo52 }}
+      {{- $pos := cond (gt (sub .hi52 .lo52) 0) (mul 100 (div (float (sub .close .lo52)) (sub .hi52 .lo52))) 50 }}
+      <div class="range52">
+        <p class="st-h">52주 범위</p>
+        <div class="r-bar"><i style="left: {{ $pos }}%"></i></div>
+        <p class="r-ends"><span>{{ lang.FormatNumber 0 .lo52 }}</span><span>{{ lang.FormatNumber 0 .hi52 }}</span></p>
+      </div>
+      {{- end }}
+      <dl class="st-list">
+        {{- with .prev_close }}<div><dt>전일 종가</dt><dd>{{ lang.FormatNumber 0 . }}</dd></div>{{ end }}
+        {{- with .open }}<div><dt>시가</dt><dd>{{ lang.FormatNumber 0 . }}</dd></div>{{ end }}
+        {{- with .high }}<div><dt>고가</dt><dd>{{ lang.FormatNumber 0 . }}</dd></div>{{ end }}
+        {{- with .low }}<div><dt>저가</dt><dd>{{ lang.FormatNumber 0 . }}</dd></div>{{ end }}
+        {{- with .volume }}<div><dt>거래량</dt><dd>{{ lang.FormatNumber 0 . }}</dd></div>{{ end }}
+        {{- with .value }}<div><dt>거래대금</dt><dd>{{ lang.FormatNumber 0 (div . 100000000.0) }}억</dd></div>{{ end }}
+        {{- with .mktcap }}<div><dt>시가총액</dt><dd>{{ lang.FormatNumber 0 (div . 100000000.0) }}억</dd></div>{{ end }}
+        {{- with .shares }}<div><dt>상장주식수</dt><dd>{{ lang.FormatNumber 0 . }}</dd></div>{{ end }}
+        {{- with $mk.valuation }}
+        <div><dt>PER</dt><dd>{{ with .per }}{{ lang.FormatNumber 1 . }}배{{ else }}N/A{{ end }}</dd></div>
+        <div><dt>EPS</dt><dd>{{ with .eps }}{{ lang.FormatNumber 0 . }}원{{ else }}N/A{{ end }}</dd></div>
+        <div><dt>PBR</dt><dd>{{ with .pbr }}{{ lang.FormatNumber 2 . }}배{{ else }}N/A{{ end }}</dd></div>
+        <div><dt>BPS</dt><dd>{{ with .bps }}{{ lang.FormatNumber 0 . }}원{{ else }}N/A{{ end }}</dd></div>
+        {{- end }}
+      </dl>
+      <p class="co-note">{{ .asof }} 종가 기준(KRX){{ with $mk.valuation }}. PER·EPS는 {{ .eps_basis }} 지배주주 순이익, PBR·BPS는 {{ .bps_basis }} 지배주주 자본으로 단순 계산{{ end }}</p>
+    </div>
+  </section>
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js" defer></script>
+  <script src="{{ "js/chart.js" | relURL }}" defer></script>
+  {{- end }}
 
   <div class="co-layout">
     {{- /* 최신 리포트: 종류와 상관없이 가장 최근 1건 */ -}}
@@ -61,6 +117,21 @@
       </dl>
     </section>
 
+    {{- with $mk }}{{ with .holders }}{{ with .holders }}
+    <section class="co-holders" aria-labelledby="holders-h">
+      <h2 id="holders-h">주요주주</h2>
+      <div class="tbl-wrap">
+        <table class="mini-tbl">
+          <thead><tr><th>주주</th><th>보유주식수</th><th>지분율</th></tr></thead>
+          <tbody>
+            {{- range . }}<tr><td>{{ .name }}</td><td>{{ with .shares }}{{ lang.FormatNumber 0 . }}{{ end }}</td><td>{{ with .pct }}{{ lang.FormatNumber 2 . }}%{{ end }}</td></tr>{{ end }}
+          </tbody>
+        </table>
+      </div>
+      <p class="co-note">{{ with $mk.holders.asof }}{{ . }} 최대주주 현황 및 5% 이상 대량보유 보고 기준 (DART){{ end }}</p>
+    </section>
+    {{- end }}{{ end }}{{ end }}
+
     {{- with .segments }}
     <section class="co-seg" aria-labelledby="seg-h">
       <h2 id="seg-h">사업 구성 <small>매출 비중</small></h2>
@@ -72,6 +143,35 @@
       {{- with (index . 0).basis }}<p class="co-note">기준: {{ . }}</p>{{ end }}
     </section>
     {{- end }}
+
+    {{- with $mk }}{{ with .financials }}
+    {{- $fin := . }}
+    <section class="co-fin" aria-labelledby="fin-h">
+      <h2 id="fin-h">주요 재무정보 <small>억원</small></h2>
+      <div class="tbl-wrap">
+        <table class="mini-tbl fin">
+          <thead><tr><th></th>{{ range $fin }}<th>{{ .period }}</th>{{ end }}</tr></thead>
+          <tbody>
+            {{- range slice (slice "매출액" "revenue" "n") (slice "영업이익" "op" "n") (slice "순이익" "net" "n") (slice "영업이익률" "op_margin" "p") (slice "순이익률" "net_margin" "p") }}
+            {{- $row := . }}
+            <tr><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if ne $v nil }}{{ if eq (index $row 2) "p" }}{{ lang.FormatNumber 1 $v }}%{{ else }}{{ lang.FormatNumber 0 $v }}{{ end }}{{ end }}</td>{{ end }}</tr>
+            {{- end }}
+            <tr class="sep"><th colspan="{{ add 1 (len $fin) }}">재무상태</th></tr>
+            {{- range slice (slice "부채비율" "debt_ratio" "p") (slice "순부채비율" "net_debt_ratio" "p") (slice "이자보상배율" "interest_cover" "x") }}
+            {{- $row := . }}
+            <tr><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if ne $v nil }}{{ lang.FormatNumber 1 $v }}{{ if eq (index $row 2) "p" }}%{{ else }}배{{ end }}{{ end }}</td>{{ end }}</tr>
+            {{- end }}
+            <tr class="sep"><th colspan="{{ add 1 (len $fin) }}">현금흐름</th></tr>
+            {{- range slice (slice "영업활동" "cfo") (slice "투자활동" "cfi") (slice "재무활동" "cff") }}
+            {{- $row := . }}
+            <tr><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if ne $v nil }}{{ lang.FormatNumber 0 $v }}{{ end }}</td>{{ end }}</tr>
+            {{- end }}
+          </tbody>
+        </table>
+      </div>
+      <p class="co-note">DART 재무제표({{ (index $fin 0).fs }}) 기준. 분기는 연초부터 누적. 순부채비율 = (차입금·사채 − 현금성자산) ÷ 자본, 이자보상배율 = 영업이익 ÷ 이자비용으로 단순 계산</p>
+    </section>
+    {{- end }}{{ end }}
 
     {{- with .peers }}
     <section class="co-peers" id="peers" aria-labelledby="peers-h">

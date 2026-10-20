@@ -87,6 +87,7 @@ def export_profile(code, prof):
     co, ind = prof.get("company") or {}, prof.get("industry") or {}
     card = {
         "market": co.get("market"),
+        "corp_code": co.get("corp_code"),  # DART 고유번호: scripts/market.py가 주요주주·재무 조회에 씀
         "ceo": co.get("ceo"),
         "hq": co.get("hq"),
         "homepage": co.get("homepage"),

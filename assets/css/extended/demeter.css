@@ -1704,7 +1704,7 @@ a.r-co:hover {
 
     .co-reports {
         grid-column: 1;
-        grid-row: 1 / span 6;
+        grid-row: 1 / span 8;
     }
 
     .bo-card,
@@ -1732,5 +1732,280 @@ a.r-co:hover {
 
     .co-page h2 {
         font-size: 20px;
+    }
+}
+
+/* ── 회사 페이지: 종가 · 주가 차트 · 시세 정보 · 주요주주 · 주요 재무정보 (2026-10-20, scripts/market.py 데이터) ──
+   휴대폰: 차트 아래에 시세 정보 / 데스크톱: 차트 왼쪽 넓게, 시세 정보 오른쪽 */
+.co-quote {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    width: 100%;
+    margin: 6px 0 0;
+}
+
+.q-close {
+    font-family: var(--font-data);
+    font-size: clamp(28px, 5vw, 36px);
+    font-weight: 500;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.q-close small {
+    margin-left: 2px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.q-chg {
+    font-family: var(--font-data);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.up {
+    color: #C8372D;            /* 국내 관례: 오르면 빨강, 내리면 파랑 */
+}
+
+.down {
+    color: #2F6BC4;
+}
+
+:root[data-theme="dark"] .up {
+    color: #F07A70;
+}
+
+:root[data-theme="dark"] .down {
+    color: #7FA9EA;
+}
+
+.q-asof {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.co-market {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    margin: 4px 0 32px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+}
+
+.co-chart[hidden] {
+    display: none;
+}
+
+.ch-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* 휴대폰: 기간 버튼 여섯 개가 한 줄을 나눠 쓰고, 기간 수익률은 그 아래 오른쪽 */
+.ch-periods {
+    display: flex;
+    flex: 1 1 100%;
+    gap: 4px;
+}
+
+.ch-periods button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 34px;
+    padding: 4px 8px;
+    font-family: var(--font-data);
+    font-size: 13px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.ch-periods button[aria-pressed="true"] {
+    color: var(--bg);
+    background: var(--green);
+    border-color: var(--green);
+}
+
+.ch-ret {
+    flex: none;
+    margin-left: auto;
+    font-family: var(--font-data);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.ch-tip {
+    margin: 8px 0 0;
+    font-family: var(--font-data);
+    font-size: 12.5px;
+    color: var(--muted);
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.ch-plot {
+    height: 240px;
+    margin-top: 8px;
+}
+
+.range52 .st-h {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.r-bar {
+    position: relative;
+    height: 6px;
+    background: var(--chip);
+    border-radius: 3px;
+}
+
+.r-bar i {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    background: var(--green);
+    border: 2px solid var(--surface);
+    border-radius: 50%;
+    transform: translateY(-50%);
+}
+
+.r-ends {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0 0;
+    font-family: var(--font-data);
+    font-size: 12.5px;
+    color: var(--muted);
+}
+
+.st-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 20px;
+    margin: 12px 0 0;
+    font-size: 14px;
+}
+
+.st-list div {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.st-list dt {
+    color: var(--muted);
+}
+
+.st-list dd {
+    margin: 0;
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.tbl-wrap {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.mini-tbl {
+    display: table;            /* PaperMod 기본 table { display: block }을 되돌림: 칸이 폭을 채우게 */
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.mini-tbl th,
+.mini-tbl td {
+    padding: 7px 6px;
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+}
+
+.mini-tbl thead th {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: right;
+}
+
+.mini-tbl thead th:first-child,
+.mini-tbl tbody th,
+.mini-tbl td:first-child {
+    text-align: left;
+}
+
+.mini-tbl td {
+    font-family: var(--font-data);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.mini-tbl td:first-child {
+    font-family: var(--font-body);
+    white-space: normal;
+}
+
+.mini-tbl tbody th {
+    font-weight: 400;
+}
+
+.mini-tbl tr.sep th {
+    padding-top: 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gold-text);
+}
+
+@media (min-width: 861px) {
+    .co-market {
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 28px;
+        padding: 20px 22px;
+    }
+
+    .ch-plot {
+        height: 300px;
+    }
+
+    .ch-bar {
+        flex-wrap: nowrap;
+    }
+
+    .ch-periods {
+        flex: none;
+    }
+
+    .ch-periods button {
+        flex: none;
+        min-width: 42px;
+    }
+
+    .co-stats {
+        padding-left: 24px;
+        border-left: 1px solid var(--rule);
+    }
+
+    .co-holders,
+    .co-fin {
+        grid-column: 2;
     }
 }
