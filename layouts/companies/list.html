@@ -160,7 +160,10 @@
             <tr class="sep"><th colspan="{{ add 1 (len $fin) }}">재무상태</th></tr>
             {{- range slice (slice "부채비율" "debt_ratio" "p") (slice "순부채비율" "net_debt_ratio" "p") (slice "이자보상배율" "interest_cover" "x") }}
             {{- $row := . }}
+            {{- $has := false }}{{ range $fin }}{{ if ne (index . (index $row 1)) nil }}{{ $has = true }}{{ end }}{{ end }}
+            {{- if $has }}
             <tr><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if ne $v nil }}{{ lang.FormatNumber 1 $v }}{{ if eq (index $row 2) "p" }}%{{ else }}배{{ end }}{{ end }}</td>{{ end }}</tr>
+            {{- end }}
             {{- end }}
             <tr class="sep"><th colspan="{{ add 1 (len $fin) }}">현금흐름</th></tr>
             {{- range slice (slice "영업활동" "cfo") (slice "투자활동" "cfi") (slice "재무활동" "cff") }}
@@ -170,7 +173,7 @@
           </tbody>
         </table>
       </div>
-      <p class="co-note">DART {{ $fs }} 재무제표 기준(연결 재무제표가 없는 해는 별도로 표시). 분기는 연초부터 누적. 순부채비율 = (차입금·사채 − 현금성자산) ÷ 자본, 이자보상배율 = 영업이익 ÷ 이자비용으로 단순 계산</p>
+      <p class="co-note">DART {{ $fs }} 재무제표 기준(연결 재무제표가 없는 해는 별도로 표시). 분기는 연초부터 누적. 순부채비율 = (차입금·사채 − 현금성자산) ÷ 자본{{ with index (index $fin (sub (len $fin) 1)) "interest_cover" }}, 이자보상배율 = 영업이익 ÷ 이자비용{{ end }}으로 단순 계산. 값이 없는 칸은 공시에서 찾지 못한 항목</p>
     </section>
     {{- end }}{{ end }}
 
