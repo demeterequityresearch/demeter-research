@@ -1,0 +1,49 @@
+{
+  "market": "KOSPI",
+  "homepage": null,
+  "industry": "2차전지 양극재",
+  "definition": "리튬이온 2차전지용 양극활물질(삼원계 NCM·NCA·NCMA, LFP)을 제조해 셀 제조사에 공급하는 산업",
+  "secondary": [
+    "LFP 양극재(2026 하반기 양산 개시)",
+    "전구체(LS 합작 LLBS)"
+  ],
+  "segments": [
+    {
+      "name": "양극활물질",
+      "share": 100.0,
+      "basis": null
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "name": "에코프로비엠",
+      "code": "247540",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "포스코퓨처엠",
+      "code": "003670",
+      "market": "KOSPI"
+    },
+    {
+      "name": "코스모신소재",
+      "code": "005070",
+      "market": "KOSPI"
+    }
+  ],
+  "drivers": [
+    "북미 ESS·비중국 LFP 수요 (FEOC)",
+    "울트라하이니켈·46파이 원통형",
+    "EV 수요와 삼원계 비중 축소",
+    "리튬·메탈 가격",
+    "로봇·UAM 등 신규 응용처"
+  ],
+  "risks": [
+    "고객 이원화 (외부고객1 87%)",
+    "9.24조 유럽 계약(파산 고객) 축소·취소",
+    "메탈 가격 급락에 따른 래깅·재고평가손실",
+    "LFP 램프업 부진·원가 열위",
+    "고부채·CB/BW 희석과 파생손실"
+  ]
+}

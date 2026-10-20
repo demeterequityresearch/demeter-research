@@ -1,5 +1,5 @@
 {{- /* 리포트 한 줄: 날짜 · (회사) · 제목(리포트 헤드라인, 없으면 '코세스 기업 분석' 같은 이름) · 부제. 누르면 리포트 페이지.
-       쓰는 곳: 회사 페이지(withCompany=false), 리포트 페이지(true) */ -}}
+       쓰는 곳: 회사 페이지(withCompany=false, withType=true: 종류 표시), 리포트 목록(true) */ -}}
 {{- $p := .page }}
 <li class="row" data-type="{{ $p.Params.reportType }}">
   <span class="r-date">{{ $p.Date.Format "2006-01-02" }}</span>
@@ -11,7 +11,7 @@
   {{- end }}
   {{- end }}
   <span class="r-main">
-    {{- if .withCompany }}
+    {{- if or .withCompany .withType }}
     {{- range where site.Params.reportTypes "key" $p.Params.reportType }}<span class="r-type">{{ .name }}</span>{{ end }}
     {{- end }}
     <a class="r-title" href="{{ $p.RelPermalink }}">{{ $p.Params.headline | default $p.Title }}</a>

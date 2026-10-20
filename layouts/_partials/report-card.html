@@ -1,0 +1,10 @@
+{{- /* 리포트 카드 한 장: 회사·종류·날짜 / 헤드라인. 홈 '이번 주 새 리포트'에서 씀 */ -}}
+{{- $p := . }}
+<li class="card" data-type="{{ $p.Params.reportType }}">
+  <p class="c-meta">
+    {{- with site.GetPage (printf "/companies/%s" $p.Params.code) }}<a class="c-co" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ else }}<span class="c-co">{{ $p.Params.company }}</span>{{ end }}
+    {{- range where site.Params.reportTypes "key" $p.Params.reportType }}<span class="r-type">{{ .name }}</span>{{ end }}
+    <span class="r-date">{{ $p.Date.Format "01.02" }}</span>
+  </p>
+  <a class="c-title" href="{{ $p.RelPermalink }}">{{ $p.Params.headline | default $p.Title }}</a>
+</li>

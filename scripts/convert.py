@@ -85,7 +85,10 @@ def main():
     # 회사 페이지: 종목코드마다 하나
     for code, name in sorted(companies.items()):
         (COMPANIES / code).mkdir()
-        (COMPANIES / code / "_index.md").write_text(f'---\ntitle: "{name}"\ncode: "{code}"\n---\n', encoding="utf-8")
+        # description: 검색엔진·공유 미리보기용 한 줄 (회사 페이지는 로그인 없이 공개, 2026-10-20)
+        desc = f"{name}({code}) 기업 분석·주간 업데이트·분기 실적 리뷰 리포트와 회사 정보"
+        (COMPANIES / code / "_index.md").write_text(
+            f'---\ntitle: "{name}"\ncode: "{code}"\ndescription: "{desc}"\n---\n', encoding="utf-8")
         print(f"company page: {code} {name}")
 
 

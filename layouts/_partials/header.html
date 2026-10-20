@@ -1,9 +1,24 @@
-{{- /* 상단 녹색 바: alphainsight 글자 로고(홈 링크, Manrope 글꼴로 그림) + 메뉴 + 로그인/로그아웃(static/js/member.js가 바꿈). PaperMod 기본 헤더를 대신함 */ -}}
-<header class="site-nav">
+{{- /* 상단 녹색 바: alphainsight 글자 로고(홈 링크, Manrope 글꼴로 그림) + 회사 검색 + 메뉴 + 로그인/로그아웃(static/js/member.js가 바꿈). PaperMod 기본 헤더를 대신함
+       회사 검색(2026-10-20): 홈에는 큰 검색창이 있어 상단 바 검색은 감춤. 휴대폰은 돋보기 버튼을 누르면 펼쳐짐 (static/js/search.js) */ -}}
+<header class="site-nav{{ if .IsHome }} is-home{{ end }}">
   <div class="wrap">
     <a class="brand" href="{{ "" | relLangURL }}" accesskey="h">
       <span class="wordmark" aria-label="{{ site.Title }}"><b>alpha</b>insight<i aria-hidden="true"></i></span>
     </a>
+    {{- if not .IsHome }}
+    <form class="nav-search" data-search="nav" data-index="{{ "index.json" | relLangURL }}" role="search" autocomplete="off">
+      <label class="nav-search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <span class="sr-only">회사명 또는 종목코드</span>
+        <input type="search" placeholder="회사명 또는 종목코드" maxlength="64"
+          role="combobox" aria-expanded="false" aria-controls="nav-suggest" aria-autocomplete="list">
+      </label>
+      <ul class="suggest" id="nav-suggest" role="listbox" aria-label="검색 결과" hidden></ul>
+    </form>
+    <button type="button" class="nav-search-toggle" data-search-toggle aria-expanded="false" aria-label="회사 검색">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+    </button>
+    {{- end }}
     <nav aria-label="주 메뉴">
       <ul>
         {{- $page := . }}

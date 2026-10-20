@@ -1,8 +1,10 @@
 {{- /* 회원 로그인 (Supabase). 모든 페이지 <head>에 들어감 (extend_head.html)
-       - 회원만 보는 곳(reports·companies 섹션): 로그인 기록이 없으면 그 자리에서 로그인 페이지로 보냄 (아래 인라인 스크립트, 화면 깜빡임 방지)
+       - 회원만 보는 곳: 지금은 없음. 2026-10-20부터 회사 페이지·리포트 목록·리포트 페이지는 누구나 보고, 리포트 PDF만 회원 전용
+         (리포트 페이지가 로그인하지 않은 사람에게 로그인 안내를 보여 줌, layouts/reports/page.html).
+         어떤 섹션을 다시 막으려면 아래 slice에 섹션 이름을 넣음: 로그인 기록이 없으면 그 자리에서 로그인 페이지로 보냄(화면 깜빡임 방지)
        - 실제 로그인 확인·상단 '로그인/로그아웃'·리포트 열람은 static/js/member.js */ -}}
 {{- $sb := site.Params.supabase }}
-{{- $gated := in (slice "reports" "companies") .Section }}
+{{- $gated := in (slice) .Section }}
 {{- $ref := index (findRESubmatch `https://([^.]+)\.` $sb.url 1) 0 1 }}
 <script>
 window.DEMETER = {

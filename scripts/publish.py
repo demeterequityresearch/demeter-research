@@ -15,10 +15,15 @@ R2에 올릴 때 Cloudflare API 토큰이 필요합니다: .secrets.env의 CLOUD
   python scripts/publish.py 코세스             코세스의 모든 종류 최종본
   python scripts/publish.py 089890 --type BO  종목코드 + 종류(BO/WU/QR) 지정
   python scripts/publish.py --all             모든 기업의 최종본
+  python scripts/publish.py --profiles        회사 정보(data/companies/*.json)만 다시 만듦 (게시된 회사)
 올린 뒤 git commit & push 하면 사이트에 반영됩니다.
 
 리포트 제목(헤드라인)은 원본 docx 첫 장의 'Equity Research | …' 줄 바로 다음 문단이다.
 올릴 때 reports/<표준 파일명>.json 에 기록하고, scripts/convert.py가 front matter로 옮긴다.
+
+회사 페이지의 회사 정보(2026-10-20): 리포트를 올릴 때 profile.json에서 공개해도 되는 항목만 골라 data/companies/<종목코드>.json에 씀.
+사실 위주(업종·사업 구성·주요 고객·비교 기업·성장 요인·위험의 이름). 전망 표시(outlook)·가능성 평가, 지켜볼 지표(외부 추정치가 섞임),
+고객 메모 같은 내부 분석 메모는 넣지 않음. 회사 페이지는 로그인 없이 공개되므로 항목을 늘릴 때 같은 기준으로 고를 것.
 
 사이트 바닥글의 면책 문구는 리포트와 따로 쓴다(2026-10-20 사용자 결정): data/disclaimer.json을 이 폴더에서 직접 고친다.
 리포트 Disclaimer(report_utils.DISCLAIMER_TEXT)와 핵심(투자 권유 아님, 목표주가·투자의견 미제시, 책임은 투자자)은 같게 유지한다.
@@ -77,6 +82,36 @@ def companies():
     return out
 
 
+def customer_names(c):
+    """주요 고객 이름 목록. profile마다 형식이 다름: {"key": [이름...]} 또는 [{"name": ...}, ...]"""
+    if isinstance(c, dict):
+        c = c.get("key") or []
+    return [x.get("name") if isinstance(x, dict) else x for x in c or [] if x]
+
+
+def export_profile(code, prof):
+    """profile.json에서 공개 항목만 data/companies/<종목코드>.json에 씀 (회사 페이지, 로그인 없이 공개)"""
+    co, ind = prof.get("company") or {}, prof.get("industry") or {}
+    card = {
+        "market": co.get("market"),
+        "homepage": co.get("homepage"),
+        "industry": ind.get("primary"),
+        "definition": ind.get("definition"),
+        "secondary": ind.get("secondary") or [],
+        "segments": [{"name": s["name"], "share": s.get("revenue_share_pct"), "basis": s.get("basis")}
+                     for s in prof.get("segments") or [] if s.get("name")],
+        "customers": customer_names(prof.get("customers")),
+        "peers": [{"name": p["name"], "code": p.get("stock_code"), "market": p.get("market")}
+                  for p in prof.get("peers") or [] if p.get("name")],
+        "drivers": [d["driver"] for d in prof.get("growth_drivers") or [] if d.get("driver")],
+        "risks": [r["risk"] for r in prof.get("risks") or [] if r.get("risk")],
+    }
+    out = SITE / "data" / "companies" / f"{code}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(card, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[회사 정보] data/companies/{code}.json")
+
+
 def candidates(name, code, prof, types):
     """최종본마다 (원본 PDF, 웹사이트용 표준 파일명(확장자 없음), 원본 경로) — PDF가 없으면 원본 PDF는 None."""
     for agent, entry in (prof.get("latest_reports") or {}).items():
@@ -101,9 +136,17 @@ def main():
     ap.add_argument("--type", action="append", choices=list(CODES.values()), help="BO / WU / QR (여러 번 가능)")
     ap.add_argument("--all", action="store_true", help="모든 기업")
     ap.add_argument("--list", action="store_true", help="목록만 보기")
+    ap.add_argument("--profiles", action="store_true", help="게시된 회사의 회사 정보만 다시 만듦")
     a = ap.parse_args()
-    if not (a.company or a.all or a.list):
-        ap.error("회사명·종목코드, --all, --list 중 하나가 필요합니다")
+    if not (a.company or a.all or a.list or a.profiles):
+        ap.error("회사명·종목코드, --all, --list, --profiles 중 하나가 필요합니다")
+
+    if a.profiles:
+        published = {parse(f.stem)[1]["code"] for f in DEST.glob("*.json") if parse(f.stem)}
+        for name, code, prof in companies():
+            if code in published:
+                export_profile(code, prof)
+        return
 
     targets = [c for c in companies() if a.all or a.list or a.company in (c[0], c[1])]
     if not targets:
@@ -132,6 +175,7 @@ def main():
             entry.write_text(json.dumps({"headline": h} if h else {}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             print(f"[목록] reports/{entry.name}" + (f"  제목: {h}" if h else "  (제목을 찾지 못함: 기본 이름으로 표시)"))
             prune(code, meta["reportType"])
+            export_profile(code, prof)
 
 
 if __name__ == "__main__":

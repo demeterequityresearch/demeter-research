@@ -1,5 +1,6 @@
 {{- define "main" }}
 {{- /* 리포트 한 편: 홈 / 회사 / 종류 경로, 제목(리포트 헤드라인), PDF 보기 (회원만, 다운로드 버튼 없음 2026-10-18)
+       페이지는 누구나 보고(2026-10-20), 로그인하지 않았으면 PDF 자리에 로그인 안내
        PDF는 Cloudflare R2 비공개 버킷에 있고(.Params.file), 회원 확인 Worker(worker/index.js)가 기록표(downloads)에 남긴 뒤 보내 줌 → pdf.js로 그림.
        hugo.toml [params.cloudflare] worker가 비어 있으면(전환 전) 예전처럼 Supabase 보관함에서: 기록 → 임시 주소 (supabase/setup.sql) */ -}}
 {{- $co := site.GetPage (printf "/companies/%s" (.Params.code | default "")) }}
@@ -8,7 +9,7 @@
     <a href="{{ "" | relLangURL }}">홈</a> /
     {{- with $co }} <a href="{{ .RelPermalink }}">{{ .Title }}</a> /{{ end }}
     {{- range where site.Params.reportTypes "key" .Params.reportType }}
-    {{- if $co }} <a href="{{ $co.RelPermalink }}#sec-{{ .key | lower }}">{{ .name }}</a>{{ else }} {{ .name }}{{ end }}
+    {{- if $co }} <a href="{{ $co.RelPermalink }}?type={{ .key }}#reports">{{ .name }}</a>{{ else }} {{ .name }}{{ end }}
     {{- end }}
   </p>
   <header class="page-head">
@@ -80,7 +81,12 @@
     window.demeterRenderPdf = render;  // 미리보기 점검용
 
     document.addEventListener('demeter:ready', function (e) {
-      if (!e.detail.session) return;
+      if (!e.detail.session) {
+        var next = encodeURIComponent(location.pathname + location.search);
+        box.innerHTML = '<div class="viewer-gate"><p><strong>회원 전용 리포트입니다.</strong><br>무료 회원으로 로그인하면 리포트 전문을 볼 수 있습니다.</p>' +
+          '<a class="gate-btn" href="' + window.DEMETER.login + '?next=' + next + '">로그인 / 무료 가입</a></div>';
+        return;
+      }
       var source = window.DEMETER.worker ? Promise.resolve(fromWorker(e.detail.session)) : signedUrl(e.detail.sb);
       source.then(render).catch(function () {
         note.textContent = '리포트를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';

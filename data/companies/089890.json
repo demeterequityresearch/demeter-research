@@ -1,0 +1,83 @@
+{
+  "market": "KOSDAQ",
+  "homepage": "www.koses.co.kr",
+  "industry": "반도체 후공정(패키징) 장비",
+  "definition": "솔더볼 어태치·PKG 적층 등 후공정 장비와 레이저 커팅·마킹 장비를 주문 생산. 2025.11부터 Bloom Energy에 AI 서버용(SOFC) 전극셀 자동화 장비 공급",
+  "secondary": [
+    "SOFC(고체산화물 연료전지) 전극셀 제조 자동화 장비",
+    "레이저 응용 장비",
+    "2차전지 제조 자동화 장비"
+  ],
+  "segments": [
+    {
+      "name": "반도체 제조용 장비 & 자동화 장비",
+      "share": 37.8,
+      "basis": "2025 매출"
+    },
+    {
+      "name": "레이저 응용 장비",
+      "share": 26.4,
+      "basis": "2025 매출"
+    },
+    {
+      "name": "Conversion Kit, A/S, Modify 등",
+      "share": 23.4,
+      "basis": "2025 매출"
+    },
+    {
+      "name": "2차전지 제조용 장비 (Bloom SOFC 전극셀 장비 포함 추정)",
+      "share": 12.4,
+      "basis": "2025 매출"
+    }
+  ],
+  "customers": [
+    "Bloom Energy",
+    "삼성전자",
+    "SK하이닉스",
+    "엠코테크놀로지코리아",
+    "스태츠칩팩코리아",
+    "ENOVIX"
+  ],
+  "peers": [
+    {
+      "name": "한미반도체",
+      "code": "042700",
+      "market": "KOSPI"
+    },
+    {
+      "name": "이오테크닉스",
+      "code": "039030",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "프로텍",
+      "code": "053610",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "제너셈",
+      "code": "217190",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "인텍플러스",
+      "code": "064290",
+      "market": "KOSDAQ"
+    }
+  ],
+  "drivers": [
+    "AI 데이터센터 온사이트 전력(SOFC) 수요",
+    "Bloom 생산능력 증설 (1GW → 2GW 2026말, 이후 확대 거론)",
+    "반도체 패키징(HBM·고급 패키징) 투자",
+    "레이저·디스플레이 설비투자",
+    "SOFC 공급망 리스크 (스칸듐 등)"
+  ],
+  "risks": [
+    "단일 고객(Bloom) 집중",
+    "납기 연장·매출 인식 지연",
+    "Bloom 주가·신뢰 리스크 전이",
+    "후공정·레이저 매출 변동",
+    "환율 (달러 수주)",
+    "기대 선반영 밸류에이션"
+  ]
+}
