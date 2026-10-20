@@ -1,4 +1,4 @@
-{{- /* 상단 녹색 바: alphainsight 글자 로고(홈 링크, Manrope 글꼴로 그림) + 회사 검색 + 메뉴 + 로그인/로그아웃(static/js/member.js가 바꿈). PaperMod 기본 헤더를 대신함
+{{- /* 상단 녹색 바: alphainsight 글자 로고(홈 링크, Manrope 글꼴로 그림) + 회사 검색 + 메뉴(홈·소개·리포트·Contact, 2026-10-20) + 로그인/로그아웃(static/js/member.js가 바꿈). PaperMod 기본 헤더를 대신함
        회사 검색(2026-10-20): 홈에는 큰 검색창이 있어 상단 바 검색은 감춤. 휴대폰은 돋보기 버튼을 누르면 펼쳐짐 (static/js/search.js) */ -}}
 <header class="site-nav{{ if .IsHome }} is-home{{ end }}">
   <div class="wrap">
@@ -22,9 +22,7 @@
     <nav aria-label="주 메뉴">
       <ul>
         {{- $page := . }}
-        <li><a class="nav-home" href="{{ "" | relLangURL }}" aria-label="홈"{{ if .IsHome }} aria-current="page"{{ end }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9v11h13V9"></path><path d="M10 20v-6h4v6"></path></svg>
-        </a></li>
+        <li><a href="{{ "" | relLangURL }}"{{ if .IsHome }} aria-current="page"{{ end }}>홈</a></li>
         {{- range site.Menus.main }}
         {{- $on := or ($page.IsMenuCurrent "main" .) ($page.HasMenuCurrent "main" .) }}
         <li><a href="{{ .URL }}"{{ if $on }} aria-current="page"{{ end }}>{{ .Name }}</a></li>

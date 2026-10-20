@@ -35,7 +35,7 @@ theme = "PaperMod"
     desc = "한 주의 시세와 기술적 지표, 공시와 보도, 모니터링 지표의 변화를 짚습니다."
   [[params.reportTypes]]
     key = "QR"
-    name = "분기 실적 리뷰"
+    name = "실적 리뷰"
     desc = "분기 실적을 직전 분기·전년 동기·컨센서스와 비교하고 앞선 리포트의 가설을 점검합니다."
 
   # 회원 로그인·리포트 보관함 (Supabase 프로젝트 bfhkkaeyvdtmzpxxdlrc). key는 공개돼도 되는 publishable key.
@@ -65,10 +65,10 @@ theme = "PaperMod"
     pageRef = "/about"
     weight = 1
   [[menu.main]]
-    name = "리서치 방법"
-    pageRef = "/method"
-    weight = 2
-  [[menu.main]]
     name = "리포트"
     pageRef = "/reports"
+    weight = 2
+  [[menu.main]]
+    name = "Contact"
+    pageRef = "/contact"
     weight = 3

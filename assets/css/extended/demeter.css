@@ -197,17 +197,6 @@ h3 {
     border-bottom-color: var(--gold);
 }
 
-/* 홈 버튼(집 모양): 소개 왼쪽 */
-.site-nav .nav-home {
-    display: flex;
-    align-items: center;
-}
-
-.site-nav .nav-home svg {
-    width: 19px;
-    height: 19px;
-}
-
 /* ── 공통 페이지 머리 ── */
 .view {
     padding-block: 48px 72px;
@@ -239,13 +228,14 @@ h3 {
 }
 
 /* ── 홈: 검색 ── */
-/* 첫 화면은 검색창이 차지하고, 바닥글 면책 고지는 맨 아래에 제목만 살짝 보이게 (화면 높이 - 상단 바 - 바닥글 보이는 부분) */
+/* 첫 화면: 검색창이 가운데, 바닥글 Disclaimer는 맨 아래에 상단 바 높이만큼만 보이게 (화면 크기와 상관없이, 2026-10-20)
+   높이 = 화면 높이 - 상단 바(--nav-h, site.js가 잼) - 바닥글 보이는 부분(상단 바와 같은 높이) */
 .home {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: calc(100svh - var(--home-peek, 170px));
-    padding-block: 48px 12vh;
+    min-height: calc(100svh - 2 * var(--nav-h, 64px));
+    padding-block: 24px;
 }
 
 .search {
@@ -373,12 +363,6 @@ h3 {
 
 .suggest .s-none:hover {
     background: none;
-}
-
-.search-hint {
-    text-align: center;
-    font-size: 13.5px;
-    color: var(--muted);
 }
 
 .coverage {
@@ -1161,68 +1145,8 @@ a.r-co:hover {
     border-color: var(--gold);
 }
 
-.more-btn[hidden],
-.card[hidden] {
+.more-btn[hidden] {
     display: none;
-}
-
-/* ── 홈: 이번 주 새 리포트 ── */
-.home.has-new {
-    min-height: auto;
-    padding-block: 12vh 40px;
-}
-
-.new-reports {
-    padding-bottom: 64px;
-}
-
-.card-list {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.card {
-    display: grid;
-    gap: 4px;
-    padding: 14px 16px;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 12px;
-}
-
-.c-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 10px;
-    font-size: 13.5px;
-}
-
-.c-co {
-    font-weight: 600;
-}
-
-a.c-co:hover {
-    color: var(--gold-text);
-}
-
-.c-meta .r-date {
-    margin-left: auto;
-    font-size: 12.5px;
-}
-
-.c-title {
-    font-family: var(--font-head);
-    font-size: 17px;
-    font-weight: 700;
-    line-height: 1.45;
-}
-
-.c-title:hover {
-    color: var(--gold-text);
 }
 
 /* ── 회사 페이지 ── */
@@ -1392,7 +1316,7 @@ a.c-co:hover {
     display: none;            /* 휴대폰은 제목만: 목록이 길어지지 않게 */
 }
 
-/* 분기 실적 리뷰: 데스크톱 오른쪽 칸에만 */
+/* 실적 리뷰: 데스크톱 오른쪽 칸에만 */
 .co-qr {
     display: none;
 }
@@ -1607,16 +1531,6 @@ a.c-co:hover {
         display: none;
     }
 
-    .card-list {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
-    }
-
-    .card {
-        align-content: start;
-        padding: 16px 18px;
-    }
-
     .co-page {
         padding-top: 40px;
     }
@@ -1627,7 +1541,7 @@ a.c-co:hover {
         padding: 0;
     }
 
-    /* 왼쪽 넓은 칸: 리포트 목록 / 오른쪽 좁은 칸: 기업 분석 카드·분기 실적 리뷰·회사 정보·비교 기업 */
+    /* 왼쪽 넓은 칸: 리포트 목록 / 오른쪽 좁은 칸: 기업 분석 카드·실적 리뷰·회사 정보·비교 기업 */
     .co-layout {
         grid-template-columns: minmax(0, 1fr) 340px;
         grid-auto-flow: dense;

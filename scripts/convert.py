@@ -6,7 +6,7 @@ reports/ 에는 표준 파일명의 작은 .json(제목 정보)만 남깁니다.
 파일명 규칙 (Stock analysis reports와 공통, 2026-10-18):
   <YYYYMMDD>_<회사명>_<종목코드>_<BO|WU|QR>[_<기간>].json
   예: 20261018_코세스_089890_BO.json         ->  '코세스 기업 분석', /reports/20261018-089890-bo/, 보관함 20261018-089890-bo.pdf
-      20261115_코세스_089890_QR_2026Q3.json  ->  '코세스 2026 3Q 분기 실적 리뷰', /reports/20261115-089890-qr-2026q3/
+      20261115_코세스_089890_QR_2026Q3.json  ->  '코세스 2026 3Q 실적 리뷰', /reports/20261115-089890-qr-2026q3/
 .json 내용: {"headline": "리포트 첫 장의 헤드라인"} ('주제: 설명'이면 콜론 앞이 제목, 뒤가 부제)
 회사마다 회사 페이지(/companies/<종목코드>/)도 만듭니다. 화면은 layouts/companies/list.html.
 """
@@ -20,7 +20,7 @@ COMPANIES = pathlib.Path("content/companies")
 TYPES = {
     "BO": ("기업 분석", "Business Overview"),
     "WU": ("주간 업데이트", "Weekly Update"),
-    "QR": ("분기 실적 리뷰", "Quarterly Performance Review"),
+    "QR": ("실적 리뷰", "Quarterly Performance Review"),  # 화면 이름만 '실적 리뷰'(2026-10-20), 종류 코드·파일명은 QR 그대로
 }
 STD = re.compile(
     r"(?P<date>\d{8})_(?P<company>[^_]+)_(?P<code>\d[0-9A-Z]{4}\d)_(?P<type>BO|WU|QR)"
@@ -86,7 +86,7 @@ def main():
     for code, name in sorted(companies.items()):
         (COMPANIES / code).mkdir()
         # description: 검색엔진·공유 미리보기용 한 줄 (회사 페이지는 로그인 없이 공개, 2026-10-20)
-        desc = f"{name}({code}) 기업 분석·주간 업데이트·분기 실적 리뷰 리포트와 회사 정보"
+        desc = f"{name}({code}) 기업 분석·주간 업데이트·실적 리뷰 리포트와 회사 정보"
         (COMPANIES / code / "_index.md").write_text(
             f'---\ntitle: "{name}"\ncode: "{code}"\ndescription: "{desc}"\n---\n', encoding="utf-8")
         print(f"company page: {code} {name}")
