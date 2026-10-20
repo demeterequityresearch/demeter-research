@@ -24,7 +24,7 @@
     <p class="co-quote">
       <span class="q-close">{{ lang.FormatNumber 0 .close }}<small>원</small></span>
       {{- with .change }}<span class="q-chg {{ $dir }}">{{ if gt . 0 }}+{{ end }}{{ lang.FormatNumber 0 . }} ({{ if gt (float $px.change_pct) 0 }}+{{ end }}{{ lang.FormatNumber 2 $px.change_pct }}%)</span>{{ end }}
-      <span class="q-asof">{{ .asof }} 종가 · KRX</span>
+      <span class="q-asof">{{ .asof }} 종가</span>
     </p>
     {{- end }}
   </header>
@@ -67,7 +67,7 @@
         <div><dt>BPS</dt><dd>{{ with .bps }}{{ lang.FormatNumber 0 . }}원{{ else }}N/A{{ end }}</dd></div>
         {{- end }}
       </dl>
-      <p class="co-note">{{ .asof }} 종가 기준(KRX){{ with $mk.valuation }}. PER·EPS는 {{ .eps_basis }} 지배주주 순이익, PBR·BPS는 {{ .bps_basis }} 지배주주 자본으로 단순 계산{{ end }}</p>
+      <p class="co-note">{{ .asof }} 종가 기준{{ with $mk.valuation }}. PER·EPS는 {{ .eps_basis }} 지배주주 순이익, PBR·BPS는 {{ .bps_basis }} 지배주주 자본으로 단순 계산{{ end }}</p>
     </div>
   </section>
   <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js" defer></script>
