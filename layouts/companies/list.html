@@ -1,53 +1,44 @@
 {{- define "main" }}
-{{- /* /companies/<종목코드>/ : 회사 페이지 (2026-10-20 개편, 로그인 없이 공개)
-         머리(회사명·코드·시장·업종) → 탭(요약·리포트·회사 정보·비교 기업, 지금은 한 페이지 안 이동) →
-         기업 분석 최신판 카드 → 리포트 목록(거르기 버튼, 10건씩 더 보기) → 회사 정보 → 비교 기업
-         휴대폰은 한 줄로 쌓고, 데스크톱(861px 이상)은 왼쪽 리포트 목록 / 오른쪽 기업 분석 카드·실적 리뷰·회사 정보·비교 기업
+{{- /* /companies/<종목코드>/ : 회사 페이지 (로그인 없이 공개, 2026-10-20 사용자 문서 두 차례로 개편)
+         한 페이지(탭 없음): 머리(회사명·종목코드·시장) → 왼쪽 리포트 목록(거르기 버튼은 리포트 목록 페이지와 같음, 10건씩 더 보기)
+         오른쪽: 최신 리포트 카드(종류 상관없이 1건) → 회사 정보 → 사업 구성 → 관련 기업
+         나중에 시세·재무 데이터가 생기면: 머리에 종가, 머리 아래 주가 차트·시세 정보, 오른쪽에 주요주주·주요 재무정보 (_drafts/site_changes.md 24~27번)
+         휴대폰은 최신 리포트 → 리포트 목록 → 회사 정보 순으로 쌓고, 데스크톱(861px 이상)은 2단
          회사 정보는 data/companies/<코드>.json (scripts/publish.py가 profile.json에서 공개 항목만 골라 씀)
        /companies/ : 회사 목록. 페이지 원본은 scripts/convert.py가 리포트에서 만든다 */ -}}
 {{- if .Params.code }}
 {{- $code := .Params.code }}
 {{- $info := index site.Data.companies $code }}
 {{- $reports := (where (where site.RegularPages "Section" "reports") "Params.code" $code).ByDate.Reverse }}
-{{- $bo := where $reports "Params.reportType" "BO" }}
-{{- $qr := where $reports "Params.reportType" "QR" }}
 <div class="view co-page" data-filter-scope>
   <p class="crumb"><a href="{{ "" | relLangURL }}">홈</a> / <a href="{{ "companies/" | relLangURL }}">기업</a> / {{ .Title }}</p>
-  <header class="co-head" id="summary">
+  <header class="co-head">
     <h1>{{ .Title }}</h1>
     <span class="co-code">{{ $code }}</span>
     {{- with $info }}{{ with .market }}<span class="co-mkt">{{ . }}</span>{{ end }}{{ end }}
-    {{- with $info }}{{ with .industry }}<p class="co-ind">{{ . }}</p>{{ end }}{{ end }}
-    <p class="co-meta">리포트 {{ len $reports }}건{{ with $reports }} · 최근 발간 {{ (index . 0).Date.Format "2006-01-02" }}{{ end }}</p>
   </header>
 
-  <nav class="co-tabs" aria-label="회사 페이지 구역">
-    <a href="#summary" aria-current="true">요약</a>
-    <a href="#reports">리포트</a>
-    {{- if $info }}<a href="#profile">회사 정보</a>{{ end }}
-    {{- if and $info $info.peers }}<a href="#peers">비교 기업</a>{{ end }}
-  </nav>
-
   <div class="co-layout">
-    {{- /* 기업 분석 최신판: 연 1회 개정이라 최신판 하나를 크게 */ -}}
-    <section class="bo-card" aria-label="기업 분석 최신판">
-      <p class="bo-label">기업 분석 <span>최신판</span></p>
-      {{- with index $bo 0 }}
+    {{- /* 최신 리포트: 종류와 상관없이 가장 최근 1건 */ -}}
+    <section class="bo-card" aria-label="최신 리포트">
+      {{- with index $reports 0 }}
+      <p class="bo-label">{{ range where site.Params.reportTypes "key" .Params.reportType }}{{ .name }}{{ end }} <span>최신 리포트</span></p>
       <a class="bo-title" href="{{ .RelPermalink }}">{{ .Params.headline | default .Title }}</a>
       {{- with .Params.subhead }}<p class="bo-sub">{{ . }}</p>{{ end }}
       <p class="bo-foot"><span class="r-date">{{ .Date.Format "2006-01-02" }}</span><a href="{{ .RelPermalink }}">읽기 →</a></p>
       {{- else }}
-      <p class="bo-sub">기업 분석을 준비하고 있습니다.</p>
+      <p class="bo-label">최신 리포트</p>
+      <p class="bo-sub">리포트를 준비하고 있습니다.</p>
       {{- end }}
     </section>
 
     <section class="co-reports" id="reports" aria-labelledby="reports-h">
-      <h2 id="reports-h">리포트<span class="n">{{ len $reports }}건</span></h2>
+      <h2 id="reports-h">리포트</h2>
       <div class="filters" data-filters role="group" aria-label="리포트 종류">
         <button type="button" data-f="all" aria-pressed="true">전체</button>
-        <button type="button" data-f="WU" aria-pressed="false">주간</button>
-        <button type="button" data-f="QR" aria-pressed="false">실적 리뷰</button>
-        <button type="button" data-f="BO" aria-pressed="false">기업 분석</button>
+        {{- range site.Params.reportTypes }}
+        <button type="button" data-f="{{ .key }}" aria-pressed="false">{{ .name }}</button>
+        {{- end }}
       </div>
       <ul class="report-list" data-more="10">
         {{- range $reports }}{{ partial "report-row.html" (dict "page" . "withCompany" false "withType" true) }}{{ end }}
@@ -56,49 +47,35 @@
       <p class="co-empty" data-empty{{ if $reports }} hidden{{ end }}>이 종류의 리포트는 아직 발간되지 않았습니다.</p>
     </section>
 
-    {{- /* 실적 리뷰: 데스크톱 오른쪽 칸에만 (휴대폰은 위 거르기 버튼으로 봄) */ -}}
-    <section class="co-qr" aria-labelledby="qr-h">
-      <h2 id="qr-h">실적 리뷰</h2>
-      {{- with first 4 $qr }}
-      <ul class="mini-list">
-        {{- range . }}<li><a href="{{ .RelPermalink }}">{{ with .Params.period }}{{ substr . 0 4 }} {{ substr . 5 1 }}Q{{ end }} <span>{{ .Params.headline | default .Title }}</span></a></li>{{ end }}
-      </ul>
-      {{- else }}
-      <p class="co-empty">아직 발간된 실적 리뷰가 없습니다.</p>
-      {{- end }}
-    </section>
-
     {{- with $info }}
     <section class="co-profile" id="profile" aria-labelledby="profile-h">
       <h2 id="profile-h">회사 정보</h2>
       {{- with .definition }}<p class="co-def">{{ . }}</p>{{ end }}
-      {{- with .segments }}
-      <h3>사업 구성 <small>매출 비중</small></h3>
+      <dl class="co-facts">
+        {{- with .industry }}<div><dt>업종</dt><dd>{{ . }}</dd></div>{{ end }}
+        {{- with .market }}<div><dt>시장</dt><dd>{{ . }}</dd></div>{{ end }}
+        {{- with .ceo }}<div><dt>대표이사</dt><dd>{{ . }}</dd></div>{{ end }}
+        {{- with .hq }}<div><dt>본사</dt><dd>{{ . }}</dd></div>{{ end }}
+        {{- with .fiscal_month }}<div><dt>결산월</dt><dd>{{ . }}월</dd></div>{{ end }}
+        {{- with .homepage }}{{ $url := cond (hasPrefix . "http") . (printf "https://%s" .) }}<div><dt>홈페이지</dt><dd><a href="{{ $url }}" rel="noopener" target="_blank">{{ . }}</a></dd></div>{{ end }}
+      </dl>
+    </section>
+
+    {{- with .segments }}
+    <section class="co-seg" aria-labelledby="seg-h">
+      <h2 id="seg-h">사업 구성 <small>매출 비중</small></h2>
       <ul class="seg-list">
         {{- range . }}
         <li><span class="seg-name">{{ .name }}</span>{{ with .share }}<span class="seg-bar" style="--w: {{ . }}%"><i></i></span><span class="seg-pct">{{ . }}%</span>{{ end }}</li>
         {{- end }}
       </ul>
       {{- with (index . 0).basis }}<p class="co-note">기준: {{ . }}</p>{{ end }}
-      {{- end }}
-      {{- with .customers }}
-      <h3>주요 고객</h3>
-      <ul class="chip-list">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
-      {{- end }}
-      {{- with .drivers }}
-      <h3>성장 요인</h3>
-      <ul class="dot-list">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
-      {{- end }}
-      {{- with .risks }}
-      <h3>위험 요인</h3>
-      <ul class="dot-list">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
-      {{- end }}
-      <p class="co-note">Demeter Analysis. 자세한 내용과 출처는 기업 분석 리포트에 있습니다.</p>
     </section>
+    {{- end }}
 
     {{- with .peers }}
     <section class="co-peers" id="peers" aria-labelledby="peers-h">
-      <h2 id="peers-h">비교 기업</h2>
+      <h2 id="peers-h">관련 기업</h2>
       <ul class="peer-list">
         {{- range . }}
         {{- $pg := cond (ne .code nil) (site.GetPage (printf "/companies/%v" .code)) nil }}
@@ -109,6 +86,7 @@
         </li>
         {{- end }}
       </ul>
+      <p class="co-note">Demeter Analysis. 사업 구성과 관련 기업은 기업 분석 리포트 기준입니다.</p>
     </section>
     {{- end }}
     {{- end }}
