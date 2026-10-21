@@ -64,7 +64,7 @@ disableKinds = ["taxonomy", "term"]
     allowedOrigins = "https://alphainsight.co.kr,https://www.alphainsight.co.kr,https://demeterequityresearch.github.io"
     # 방문 분석(2026-10-21 사용자 결정): Cloudflare Web Analytics. 쿠키를 쓰지 않음. 대시보드 Web Analytics에서 사이트를 등록하고
     # 받은 JS 스니펫의 token(공개값)을 넣으면 모든 페이지에 스크립트가 들어감(layouts/_partials/extend_head.html). 빈칸이면 넣지 않음
-    analyticsToken = ""
+    analyticsToken = "36bd97c57430455e8bf56930cb321793"
 
   # 검색엔진 소유 확인(2026-10-21): 구글 서치 콘솔·네이버 서치어드바이저에서 받은 확인 코드(공개값)를 넣으면
   # 모든 페이지 <head>에 확인 태그가 들어감(테마 head.html). 등록·로그인은 사용자가 직접
