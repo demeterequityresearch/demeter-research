@@ -7,3 +7,7 @@
 {{- $v := now.Format "200601021504" }}
 <script src="{{ "js/search.js" | relURL }}?v={{ $v }}" defer></script>
 <script src="{{ "js/site.js" | relURL }}?v={{ $v }}" defer></script>
+{{- /* 방문 분석: Cloudflare Web Analytics(쿠키 없음, 2026-10-21). 토큰은 hugo.toml [params.cloudflare] analyticsToken. 운영 빌드에서만 */}}
+{{- with site.Params.cloudflare.analyticsToken }}{{ if hugo.IsProduction }}
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ . }}"}'></script>
+{{- end }}{{ end }}
