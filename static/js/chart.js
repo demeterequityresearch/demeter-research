@@ -16,9 +16,9 @@
     var chart = LightweightCharts.createChart(plot, {
       autoSize: true,
       layout: { background: { color: 'transparent' }, textColor: v('--muted'), fontFamily: v('--font-data') || 'monospace', fontSize: 11 },
-      grid: { vertLines: { visible: false }, horzLines: { color: v('--rule') } },
+      grid: { vertLines: { visible: false }, horzLines: { color: v('--rule'), style: LightweightCharts.LineStyle.Dashed } },
       rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.08, bottom: 0.26 } },
-      timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
+      timeScale: { borderVisible: true, borderColor: v('--muted'), fixLeftEdge: true, fixRightEdge: true },
       crosshair: { mode: 1, vertLine: { labelVisible: false }, horzLine: { labelVisible: false } },
       handleScroll: false, handleScale: false,
       localization: { priceFormatter: function (p) { return fmt.format(Math.round(p)); } }
@@ -52,15 +52,15 @@
     });
     show('1Y');
 
-    // 날짜별 값: 차트 위를 누르거나 마우스를 올리면 위쪽에 표시
+    // 날짜별 값: 차트 위를 누르거나 마우스를 올리면 위쪽에 표시. 자리는 늘 잡아 두고 글자만 보였다 감춤(차트가 밀리지 않게)
     var byDate = {};
     rows.forEach(function (r) { byDate[r[0]] = r; });
     chart.subscribeCrosshairMove(function (p) {
       var t = p && p.time;
       if (t && typeof t === 'object') t = t.year + '-' + String(t.month).padStart(2, '0') + '-' + String(t.day).padStart(2, '0');
       var r = t && byDate[t];
-      if (!r) { tip.hidden = true; return; }
-      tip.hidden = false;
+      if (!r) { tip.classList.remove('on'); return; }
+      tip.classList.add('on');
       tip.textContent = r[0] + '  종가 ' + fmt.format(r[1]) + '원  거래량 ' + fmt.format(r[4] || 0);
     });
   }).catch(function () { box.hidden = true; });

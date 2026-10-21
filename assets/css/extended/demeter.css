@@ -621,6 +621,12 @@ a.r-co:hover {
     background: #0E3B30;
 }
 
+a.mono,
+a.mono:hover {
+    text-decoration: none;
+    color: #EDE6D6;
+}
+
 .mono.m1 {
     background: #2F5D50;
 }
@@ -1855,12 +1861,19 @@ a.r-co:hover {
 }
 
 .ch-tip {
+    min-height: 1.6em;
     margin: 8px 0 0;
+    line-height: 1.6;
+    visibility: hidden;
     font-family: var(--font-data);
     font-size: 12.5px;
     color: var(--muted);
     white-space: pre;
     overflow-x: auto;
+}
+
+.ch-tip.on {
+    visibility: visible;
 }
 
 .ch-plot {
