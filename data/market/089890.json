@@ -1,22 +1,22 @@
 {
  "code": "089890",
  "price": {
-  "asof": "2026-10-20",
-  "close": 32200,
-  "change": 700,
-  "change_pct": 2.22,
-  "open": 33500,
-  "high": 34850,
-  "low": 31050,
-  "prev_close": 31500,
-  "volume": 573661,
-  "value": 19179880625,
-  "mktcap": 534035776400,
+  "asof": "2026-10-21",
+  "close": 34300,
+  "change": 2100,
+  "change_pct": 6.52,
+  "open": 33050,
+  "high": 34900,
+  "low": 32300,
+  "prev_close": 32200,
+  "volume": 349880,
+  "value": 11726679800,
+  "mktcap": 568864196600,
   "shares": 16584962,
   "hi52": 51400,
   "lo52": 15830
  },
- "updated": "2026-10-20",
+ "updated": "2026-10-21",
  "holders": {
   "holders": [
    {
@@ -31,10 +31,10 @@
  "valuation": {
   "eps": 796,
   "eps_basis": "2025",
-  "per": 40.4,
+  "per": 43.1,
   "bps": 5765,
   "bps_basis": "2026 2Q 누적",
-  "pbr": 5.59
+  "pbr": 5.95
  },
  "financials": [
   {

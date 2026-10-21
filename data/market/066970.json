@@ -1,22 +1,22 @@
 {
  "code": "066970",
  "price": {
-  "asof": "2026-10-20",
-  "close": 99100,
-  "change": -1400,
-  "change_pct": -1.39,
-  "open": 100800,
-  "high": 105000,
-  "low": 98500,
-  "prev_close": 100500,
-  "volume": 625851,
-  "value": 63736061200,
-  "mktcap": 4032116682300,
+  "asof": "2026-10-21",
+  "close": 99200,
+  "change": 100,
+  "change_pct": 0.1,
+  "open": 99700,
+  "high": 100400,
+  "low": 95100,
+  "prev_close": 99100,
+  "volume": 359502,
+  "value": 35394051050,
+  "mktcap": 4036185417600,
   "shares": 40687353,
   "hi52": 225000,
   "lo52": 63000
  },
- "updated": "2026-10-20",
+ "updated": "2026-10-21",
  "holders": {
   "holders": [
    {
