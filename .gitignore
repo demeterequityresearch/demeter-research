@@ -19,3 +19,7 @@ reports/*.docx
 PENDING.md
 # 작업 지침(내부용, 2026-10-21 사용자 결정으로 공개 저장소에서 뺌. 파일은 로컬에 둠)
 CLAUDE.md
+
+# 시세·요약 파일은 Supabase DB에서 빌드 때 만듦(scripts/sync_db.py export, 2026-10-22). 저장소에는 올리지 않음
+data/market/
+static/market/

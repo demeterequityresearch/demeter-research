@@ -1,8 +1,8 @@
 name: Deploy site
 
 # main에 push할 때 + 매일 아침(시세·재무 갱신, 2026-10-20) + 수동 실행
-# 매일 실행: scripts/market.py가 KRX·DART에서 받아 data/market·static/market을 갱신하고 저장소에 커밋한 뒤 빌드·배포.
-# 이 커밋은 GITHUB_TOKEN으로 push하므로 이 워크플로를 다시 부르지 않음(무한 반복 없음). Claude는 쓰지 않음
+# 매일 실행: scripts/market.py가 KRX·DART에서 받아 Supabase DB에 기록(2026-10-22부터 저장소에 커밋하지 않음).
+# 빌드 때마다(push 포함) scripts/sync_db.py export가 DB에서 data/market·static/market 파일을 만들어 Hugo가 읽음. Claude는 쓰지 않음
 on:
   push:
     branches: [main]
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -32,16 +32,15 @@ jobs:
         env:
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: |
           if [ -z "$KRX_API_KEY$DART_API_KEY" ]; then echo "키가 아직 없음: 시세 갱신 건너뜀"; exit 0; fi
           python3 scripts/market.py
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/market static/market
-          if git diff --cached --quiet; then echo "바뀐 시세 없음"; else
-            git commit -m "Update market data $(date -u +%Y-%m-%d)"
-            git push
-          fi
+
+      - name: Export market data from DB
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python3 scripts/sync_db.py export
 
       - name: Install Hugo
         run: |

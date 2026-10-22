@@ -41,6 +41,12 @@ KEEP = {"BO": 5, "QR": 8, "WU": 12}  # R2·사이트에 남기는 종목별 개�
 sys.path.insert(0, str(SITE / "scripts"))
 from convert import parse  # noqa: E402  표준 파일명 -> 페이지 주소·보관함 파일 이름 (convert.py 한 곳에서 정함)
 from cloudflare import r2_delete, r2_put  # noqa: E402
+import supa  # noqa: E402  Supabase DB에도 목록을 기록 (2026-10-22). 키가 없거나 실패해도 게시는 계속됨
+
+
+def sync_db():
+    supa.sync_companies()
+    supa.sync_reports()
 
 
 def headline(docx_path):
@@ -147,6 +153,7 @@ def main():
         sys.exit(f"'{a.company}'에 해당하는 기업 프로필이 없습니다 (Stock analysis reports/_data/companies)")
 
     DEST.mkdir(exist_ok=True)
+    published = False
     for name, code, prof in targets:
         for src, stem, report in candidates(name, code, prof, a.type):
             entry = DEST / f"{stem}.json"
@@ -170,6 +177,9 @@ def main():
             print(f"[목록] reports/{entry.name}" + (f"  제목: {h}" if h else "  (제목을 찾지 못함: 기본 이름으로 표시)"))
             prune(code, meta["reportType"])
             export_profile(code, prof)
+            published = True
+    if published:
+        supa.try_sync("리포트 목록", sync_db)
 
 
 if __name__ == "__main__":

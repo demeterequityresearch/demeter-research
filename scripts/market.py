@@ -18,6 +18,9 @@ DART 고유번호는 data/companies/<코드>.json의 corp_code, 없으면 data/u
 import datetime as dt
 import json, os, pathlib, sys, time, urllib.parse, urllib.request
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import supa  # noqa: E402  Supabase DB (키가 있을 때만 씀)
+
 SITE = pathlib.Path(__file__).resolve().parent.parent
 REPORTS = SITE / "reports"
 COMPANIES = SITE / "data" / "companies"
@@ -66,14 +69,39 @@ def krx_day(key, market, day):
     return {r.get("ISU_CD"): r for r in data.get("OutBlock_1") or []}
 
 
+def load_rows(code):
+    """지금까지 받은 일별 시세. Supabase DB에 있으면 거기서(2026-10-22), 없으면 static/market/<코드>.json에서"""
+    if supa.configured():
+        try:
+            rows = supa.get_prices(code)
+            if rows:
+                return rows
+        except Exception as e:  # noqa: BLE001  DB 표가 아직 없는 경우 등: 파일로 이어 감
+            print(f"[DB 주의] {code} 시세를 DB에서 읽지 못해 파일을 씀: {e}")
+    f = SERIES / f"{code}.json"
+    return json.loads(f.read_text(encoding="utf-8"))["prices"] if f.is_file() else []
+
+
+def load_old(code):
+    """지난번 요약(오늘 새 시세가 없을 때 이어 씀). DB에 있으면 DB, 없으면 파일"""
+    if supa.configured():
+        try:
+            old = supa.summary_from_db(code)
+            if old:
+                return old
+        except Exception as e:  # noqa: BLE001
+            print(f"[DB 주의] {code} 요약을 DB에서 읽지 못해 파일을 씀: {e}")
+    f = SUMMARY / f"{code}.json"
+    return json.loads(f.read_text(encoding="utf-8")) if f.is_file() else {}
+
+
 def update_prices(key, targets):
-    """targets: 종목코드 목록. static/market/<코드>.json의 일별 시세를 오늘까지 채움 (처음 보는 종목은 5년치)"""
+    """targets: 종목코드 목록. 일별 시세를 오늘까지 채움 (처음 보는 종목은 5년치)"""
     today = dt.date.today()
     start_new = today - dt.timedelta(days=365 * YEARS + 10)
     hist, need_from = {}, {}
     for code in targets:
-        f = SERIES / f"{code}.json"
-        rows = json.loads(f.read_text(encoding="utf-8"))["prices"] if f.is_file() else []
+        rows = load_rows(code)
         hist[code] = rows
         last = dt.date.fromisoformat(rows[-1][0]) if rows else start_new - dt.timedelta(days=1)
         need_from[code] = last + dt.timedelta(days=1)
@@ -120,13 +148,15 @@ def price_summary(rows):
     rate = num(extra.get("FLUC_RT"))
     if rate is None and prev:
         rate = round((last[1] - prev) / prev * 100, 2)
-    return {
+    out = {
         "asof": last[0], "close": last[1], "change": change, "change_pct": rate,
         "open": num(extra.get("TDD_OPNPRC")), "high": last[2], "low": last[3], "prev_close": prev,
         "volume": last[4], "value": num(extra.get("ACC_TRDVAL")),
         "mktcap": num(extra.get("MKTCAP")), "shares": num(extra.get("LIST_SHRS")),
         "hi52": max(highs) if highs else None, "lo52": min(lows) if lows else None,
     }
+    out["pos52"] = supa.pos52(out)  # 52주 범위 안 위치(%): 화면이 아니라 엔진이 계산
+    return out
 
 
 # ── DART 주요주주·재무 ──
@@ -330,17 +360,20 @@ def main():
     SUMMARY.mkdir(parents=True, exist_ok=True)
     SERIES.mkdir(parents=True, exist_ok=True)
 
+    supa.try_sync("companies", supa.sync_companies)
     hist = {}
     if krx_key:
         hist = update_prices(krx_key, list(targets))
     today = dt.date.today()
     for code, info in targets.items():
         old_f = SUMMARY / f"{code}.json"
-        old = json.loads(old_f.read_text(encoding="utf-8")) if old_f.is_file() else {}
+        old = load_old(code)
         rows = hist.get(code)
         # 오늘 새로 받은 시세(마지막 줄에 시가총액 등 부가 값이 있음)가 있으면 다시 계산, 없으면 지난 값 유지
         fresh = rows and len(rows[-1]) > 5
         price = price_summary(rows) if fresh else (old.get("price") or (price_summary(rows) if rows else None))
+        if price and "pos52" not in price:
+            price["pos52"] = supa.pos52(price)
         out = {"code": code, "price": price, "updated": today.isoformat()}
         corp = info.get("corp_code")
         if dart_key and corp:
@@ -357,6 +390,8 @@ def main():
                 json.dumps({"code": code, "asof": rows[-1][0], "prices": [r[:5] for r in rows]}, ensure_ascii=False, separators=(",", ":")),
                 encoding="utf-8")
         old_f.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        # Supabase DB에도 기록: 새로 받은 일별 시세(부가 값이 붙은 줄)만 추가, 요약·주주·재무는 덮어씀
+        supa.try_sync(f"{code} 시세", supa.save_market, code, out, [r for r in (rows or []) if len(r) > 5])
         print(f"[{code}] 종가 {price and price.get('close')} ({price and price.get('asof')}), "
               f"주주 {len(out.get('holders', {}).get('holders', []))}명, 재무 {len(out.get('financials', []))}개 기간")
 

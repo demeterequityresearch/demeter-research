@@ -46,7 +46,8 @@
     </div>
     <div class="co-stats">
       {{- if and .hi52 .lo52 }}
-      {{- $pos := cond (gt (sub .hi52 .lo52) 0) (mul 100 (div (float (sub .close .lo52)) (sub .hi52 .lo52))) 50 }}
+      {{- /* 위치(%)는 엔진(market.py)이 pos52로 계산해 둠. 옛 파일에는 없으므로 없으면 여기서 계산 */ -}}
+      {{- $pos := default (cond (gt (sub .hi52 .lo52) 0) (mul 100 (div (float (sub .close .lo52)) (sub .hi52 .lo52))) 50) .pos52 }}
       <div class="range52">
         <p class="st-h">52주 범위</p>
         <div class="r-bar"><i style="left: {{ $pos }}%"></i></div>
