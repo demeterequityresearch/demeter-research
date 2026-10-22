@@ -16,6 +16,10 @@ create index if not exists downloads_user_report on public.downloads (user_id, r
 
 alter table public.downloads enable row level security;
 
+-- 2026-10-30부터 Supabase가 public 새 테이블에 API 권한을 자동으로 주지 않음 → 직접 부여 (행 단위 제한은 아래 규칙이 맡음)
+grant select, insert on public.downloads to authenticated;
+grant all on public.downloads to service_role;
+
 drop policy if exists "회원은 자기 기록만 남김" on public.downloads;
 create policy "회원은 자기 기록만 남김" on public.downloads
   for insert to authenticated
