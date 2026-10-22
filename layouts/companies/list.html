@@ -155,30 +155,19 @@
     <section class="co-fin" aria-labelledby="fin-h">
       <h2 id="fin-h">주요 재무정보 <small>억원</small></h2>
       <div class="tbl-wrap">
+        {{- /* 2026-10-22: 지표 여덟 줄, 짝(값·비율) 사이는 점선(.pair), 나머지는 실선. 기간 칸은 같은 폭. 값이 없으면 n/a */}}
         <table class="mini-tbl fin">
-          <thead><tr><th></th>{{ range $fin }}<th>{{ .period }}{{ if ne .fs $fs }}<small class="fs-tag">{{ .fs }}</small>{{ end }}</th>{{ end }}</tr></thead>
+          <colgroup><col class="c-name">{{ range $fin }}<col>{{ end }}</colgroup>
+          <thead><tr><th></th>{{ range $fin }}<th>{{ .head | default .period }}{{ with .sub }}<small>{{ . }}</small>{{ end }}{{ if ne .fs $fs }}<small class="fs-tag">{{ .fs }}</small>{{ end }}</th>{{ end }}</tr></thead>
           <tbody>
-            {{- range slice (slice "매출액" "revenue" "n") (slice "영업이익" "op" "n") (slice "순이익" "net" "n") (slice "영업이익률" "op_margin" "p") (slice "순이익률" "net_margin" "p") }}
+            {{- range slice (slice "매출액" "revenue" "n" "pair") (slice "매출 성장률" "rev_growth" "p" "") (slice "영업이익" "op" "n" "pair") (slice "영업이익률" "op_margin" "p" "") (slice "순이익" "net" "n" "pair") (slice "순이익률" "net_margin" "p" "") (slice "부채비율" "debt_ratio" "p" "pair") (slice "순부채비율" "net_debt_ratio" "p" "") }}
             {{- $row := . }}
-            <tr><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if ne $v nil }}{{ if eq (index $row 2) "p" }}{{ lang.FormatNumber 1 $v }}%{{ else }}{{ lang.FormatNumber 0 $v }}{{ end }}{{ end }}</td>{{ end }}</tr>
-            {{- end }}
-            <tr class="sep"><th colspan="{{ add 1 (len $fin) }}">재무상태</th></tr>
-            {{- range slice (slice "부채비율" "debt_ratio" "p") (slice "순부채비율" "net_debt_ratio" "p") (slice "이자보상배율" "interest_cover" "x") }}
-            {{- $row := . }}
-            {{- $has := false }}{{ range $fin }}{{ if ne (index . (index $row 1)) nil }}{{ $has = true }}{{ end }}{{ end }}
-            {{- if $has }}
-            <tr><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if ne $v nil }}{{ lang.FormatNumber 1 $v }}{{ if eq (index $row 2) "p" }}%{{ else }}배{{ end }}{{ end }}</td>{{ end }}</tr>
-            {{- end }}
-            {{- end }}
-            <tr class="sep"><th colspan="{{ add 1 (len $fin) }}">현금흐름</th></tr>
-            {{- range slice (slice "영업활동" "cfo") (slice "투자활동" "cfi") (slice "재무활동" "cff") }}
-            {{- $row := . }}
-            <tr><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if ne $v nil }}{{ lang.FormatNumber 0 $v }}{{ end }}</td>{{ end }}</tr>
+            <tr{{ with index $row 3 }} class="{{ . }}"{{ end }}><th>{{ index $row 0 }}</th>{{ range $fin }}{{ $v := index . (index $row 1) }}<td>{{ if eq $v nil }}<span class="na">n/a</span>{{ else if eq (index $row 2) "p" }}{{ lang.FormatNumber 1 $v }}%{{ else }}{{ lang.FormatNumber 0 $v }}{{ end }}</td>{{ end }}</tr>
             {{- end }}
           </tbody>
         </table>
       </div>
-      <p class="co-note">DART {{ $fs }} 재무제표 기준(연결 재무제표가 없는 해는 별도로 표시). 분기는 연초부터 누적. 순부채비율 = (차입금·사채 − 현금성자산) ÷ 자본{{ with index (index $fin (sub (len $fin) 1)) "interest_cover" }}, 이자보상배율 = 영업이익 ÷ 이자비용{{ end }}으로 단순 계산. 값이 없는 칸은 공시에서 찾지 못한 항목</p>
+      <p class="co-note">DART {{ $fs }} 재무제표 기준. 분기는 연초부터 누적, 매출 성장률은 전년 같은 기간 대비. 순부채비율 = (차입금·사채 − 현금성자산) ÷ 자본으로 단순 계산</p>
     </section>
     {{- end }}{{ end }}
 
@@ -196,7 +185,6 @@
         </li>
         {{- end }}
       </ul>
-      <p class="co-note">Demeter Analysis. 사업 구성과 관련 기업은 기업 분석 리포트 기준입니다.</p>
     </section>
     {{- end }}
     {{- end }}

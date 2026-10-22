@@ -239,9 +239,18 @@ SUM = {"borrow"}  # 여러 계정을 더하는 것
 NAMES = {"interest": ("이자비용",)}
 
 
-def statements(key, corp, year, rc):
-    """한 보고서의 연결(없으면 별도) 재무제표 -> {항목: 값(원)}. 손익·현금흐름은 누적(thstrm_add_amount가 있으면 그것)"""
-    for fs in ("CFS", "OFS"):
+def pick(r, col):
+    """한 줄의 값: 손익은 누적(<col>_add_amount가 있으면 그것), 나머지는 <col>_amount. col은 thstrm(당기)·frmtrm(전기)"""
+    if r.get("sj_div") in ("IS", "CIS") and r.get(f"{col}_add_amount"):
+        return num(r.get(f"{col}_add_amount"))
+    return num(r.get(f"{col}_amount"))
+
+
+def statements(key, corp, year, rc, fs_list=("CFS", "OFS"), col="thstrm"):
+    """한 보고서의 연결(없으면 별도) 재무제표 -> {항목: 값(원)}. 손익·현금흐름은 누적.
+    col="frmtrm"이면 같은 보고서의 전기 숫자(다음 해 연결 보고서로 연결이 없던 해를 채울 때).
+    revenue_prev = 같은 보고서·같은 기준의 전년(동기) 매출(매출 성장률용)"""
+    for fs in fs_list:
         rows = dart(key, "fnlttSinglAcntAll.json", corp_code=corp, bsns_year=year, reprt_code=rc, fs_div=fs)
         if not rows:
             continue
@@ -250,26 +259,28 @@ def statements(key, corp, year, rc):
             vals = []
             for r in rows:
                 if r.get("account_id") in ids:
-                    v = r.get("thstrm_add_amount") if r.get("sj_div") in ("IS", "CIS") and r.get("thstrm_add_amount") else r.get("thstrm_amount")
-                    v = num(v)
+                    v = pick(r, col)
                     if v is not None:
-                        vals.append((r.get("sj_div"), v))
+                        vals.append((r.get("sj_div"), v, pick(r, "frmtrm") if col == "thstrm" else None))
             if not vals and k in NAMES:
                 for r in rows:
                     nm = (r.get("account_nm") or "").replace(" ", "")
                     if r.get("sj_div") in ("IS", "CIS") and any(nm.startswith(n) for n in NAMES[k]):
-                        v = num(r.get("thstrm_add_amount") or r.get("thstrm_amount"))
+                        v = pick(r, col)
                         if v is not None:
-                            vals.append((r.get("sj_div"), abs(v)))
+                            pv = pick(r, "frmtrm") if col == "thstrm" else None
+                            vals.append((r.get("sj_div"), abs(v), abs(pv) if pv is not None else None))
                             break
             if not vals:
                 continue
             if k in SUM:
-                got[k] = sum(v for _, v in vals)
+                got[k] = sum(v for _, v, _ in vals)
             else:
                 # 손익은 IS가 있으면 IS, 아니면 CIS
                 vals.sort(key=lambda x: 0 if x[0] in ("IS", "BS", "CF") else 1)
                 got[k] = vals[0][1]
+                if k == "revenue" and vals[0][2] is not None:
+                    got["revenue_prev"] = vals[0][2]
         if got:
             got["fs"] = "연결" if fs == "CFS" else "별도"
             return got
@@ -286,6 +297,13 @@ def financials(key, corp, today):
         if len(years) == 3:
             break
     years.reverse()
+    # 연결이 없던 해(예: 자회사가 생기기 전)는 다음 해 연결 사업보고서의 전기 숫자로 채움. 그 해 성장률은 기준이 달라 비움
+    for i in range(len(years) - 1):
+        y, st = years[i]
+        if st.get("fs") == "별도" and years[i + 1][1].get("fs") == "연결":
+            prev = statements(key, corp, int(y) + 1, "11011", fs_list=("CFS",), col="frmtrm")
+            if prev and prev.get("revenue") is not None:
+                years[i] = (y, prev)
     latest = None
     for y, rc in latest_reports(today):
         if rc == "11011":
@@ -308,8 +326,11 @@ def financials(key, corp, today):
     table = []
     for label, st in cols:
         net_debt = (st["borrow"] - st["cash"]) if "borrow" in st and "cash" in st else None
+        rev, prev = st.get("revenue"), st.get("revenue_prev")
+        head, _, sub = label.partition(" 누적")
         table.append({
-            "period": label, "fs": st.get("fs"),
+            "period": label, "head": head, "sub": "누적" if _ else "", "fs": st.get("fs"),
+            "rev_growth": round((rev - prev) / abs(prev) * 100, 1) if rev is not None and prev else None,
             "revenue": eok(st.get("revenue")), "op": eok(st.get("op")), "net": eok(st.get("net")),
             "op_margin": pct(st.get("op"), st.get("revenue")), "net_margin": pct(st.get("net"), st.get("revenue")),
             "debt_ratio": pct(st.get("liab"), st.get("equity")),
