@@ -1,0 +1,53 @@
+{
+  "market": "KOSDAQ",
+  "corp_code": "00231105",
+  "ceo": null,
+  "hq": null,
+  "homepage": null,
+  "fiscal_month": "12",
+  "industry": "LNG 초저온 보냉재 (LNG운반선 화물창 단열재, 조선기자재)",
+  "definition": "LNG(-163℃)를 담는 선박 화물창(GTT Mark III 계열)에 들어가는 R-PUF 단열 패널·멤브레인 시트를 국내 조선 3사에 수주 생산으로 공급. LNG운반선 발주 → 2~3년 뒤 건조·납품 시점에 매출 인식. 원재료(MDI·폴리올·트리플렉스)와 환율이 마진을 좌우",
+  "secondary": [
+    "PU System (가전·건축용 폴리우레탄)",
+    "냉매 가스 (수입·소분·재생)"
+  ],
+  "segments": [
+    {
+      "name": "PU단열재 사업부문 (초저온보냉재, PU System)",
+      "share": 95.7,
+      "basis": null
+    },
+    {
+      "name": "가스 사업부문 (냉매, 냉매 Recycle)",
+      "share": 4.3,
+      "basis": null
+    }
+  ],
+  "peers": [
+    {
+      "name": "한국카본",
+      "code": "017960",
+      "market": "KOSPI"
+    },
+    {
+      "name": "세진중공업",
+      "code": "075580",
+      "market": "KOSPI"
+    },
+    {
+      "name": "성광벤드",
+      "code": "014620",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "태광",
+      "code": "023160",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "하이록코리아",
+      "code": "013030",
+      "market": "KOSDAQ"
+    }
+  ]
+}
