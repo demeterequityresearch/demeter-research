@@ -158,7 +158,7 @@
         {{- /* 2026-10-22: 지표 여덟 줄, 짝(값·비율) 사이는 점선(.pair), 나머지는 실선. 기간 칸은 같은 폭. 값이 없으면 n/a */}}
         <table class="mini-tbl fin">
           <colgroup><col class="c-name">{{ range $fin }}<col>{{ end }}</colgroup>
-          <thead><tr><th></th>{{ range $fin }}<th>{{ .head | default .period }}{{ with .sub }}<small>{{ . }}</small>{{ end }}{{ if ne .fs $fs }}<small class="fs-tag">{{ .fs }}</small>{{ end }}</th>{{ end }}</tr></thead>
+          <thead><tr><th></th>{{ range $fin }}<th>{{ .head | default .period | replaceRE `^\d\d(\d\d) (\dQ)$` "${2}${1}" }}{{ with .sub }}<small>{{ . }}</small>{{ end }}{{ if ne .fs $fs }}<small class="fs-tag">{{ .fs }}</small>{{ end }}</th>{{ end }}</tr></thead>
           <tbody>
             {{- range slice (slice "매출액" "revenue" "n" "pair") (slice "매출 성장률" "rev_growth" "p" "") (slice "영업이익" "op" "n" "pair") (slice "영업이익률" "op_margin" "p" "") (slice "순이익" "net" "n" "pair") (slice "순이익률" "net_margin" "p" "") (slice "부채비율" "debt_ratio" "p" "pair") (slice "순부채비율" "net_debt_ratio" "p" "") }}
             {{- $row := . }}

@@ -2050,6 +2050,7 @@ a.mono:hover {
 }
 
 .ch-plot {
+    touch-action: pan-y;         /* 세로 끌기는 페이지 스크롤, 누르기·좌우 끌기는 차트 값 보기 */
     height: 240px;
     margin-top: 8px;
 }

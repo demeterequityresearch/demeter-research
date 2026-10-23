@@ -63,5 +63,21 @@
       tip.classList.add('on');
       tip.textContent = r[0] + '  종가 ' + fmt.format(r[1]) + '원  거래량 ' + fmt.format(r[4] || 0);
     });
+
+    // 휴대폰(2026-10-23): handleScroll을 꺼 두면 라이브러리가 터치로는 십자선을 안 그림. 터치(누르기·좌우로 끌기)는 직접 받아 같은 십자선·값 표시를 함.
+    // 세로로 끄는 동작은 페이지 스크롤에 넘김(CSS touch-action: pan-y). 마우스는 라이브러리 기본 동작
+    function onTouch(e) {
+      if (e.pointerType === 'mouse') return;
+      var x = e.clientX - plot.getBoundingClientRect().left;
+      var t = chart.timeScale().coordinateToTime(x);
+      if (t && typeof t === 'object') t = t.year + '-' + String(t.month).padStart(2, '0') + '-' + String(t.day).padStart(2, '0');
+      var r = t && byDate[t];
+      if (!r) return;
+      chart.setCrosshairPosition(r[1], t, area);
+      tip.classList.add('on');
+      tip.textContent = r[0] + '  종가 ' + fmt.format(r[1]) + '원  거래량 ' + fmt.format(r[4] || 0);
+    }
+    plot.addEventListener('pointerdown', onTouch);
+    plot.addEventListener('pointermove', onTouch);
   }).catch(function () { box.hidden = true; });
 })();

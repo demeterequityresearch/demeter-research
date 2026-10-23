@@ -16,7 +16,7 @@ DART 고유번호는 data/companies/<코드>.json의 corp_code, 없으면 data/u
   python scripts/market.py 089890       한 회사만
 """
 import datetime as dt
-import json, os, pathlib, sys, time, urllib.parse, urllib.request
+import json, os, pathlib, re, sys, time, urllib.parse, urllib.request
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import supa  # noqa: E402  Supabase DB (키가 있을 때만 씀)
@@ -328,6 +328,7 @@ def financials(key, corp, today):
         net_debt = (st["borrow"] - st["cash"]) if "borrow" in st and "cash" in st else None
         rev, prev = st.get("revenue"), st.get("revenue_prev")
         head, _, sub = label.partition(" 누적")
+        head = re.sub(r"^\d\d(\d\d) (\dQ)$", r"\2\1", head)  # 2026 2Q -> 2Q26 (표 머리가 두 줄 안에 들어가게, 2026-10-23)
         table.append({
             "period": label, "head": head, "sub": "누적" if _ else "", "fs": st.get("fs"),
             "rev_growth": round((rev - prev) / abs(prev) * 100, 1) if rev is not None and prev else None,
