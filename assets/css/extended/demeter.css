@@ -2066,3 +2066,14 @@ a.mono:hover {
         grid-column: 2;
     }
 }
+
+/* 홈 버튼(집 모양): 소개 왼쪽 */
+.site-nav .nav-home {
+    display: flex;
+    align-items: center;
+}
+
+.site-nav .nav-home svg {
+    width: 19px;
+    height: 19px;
+}

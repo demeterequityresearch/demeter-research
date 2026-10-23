@@ -22,7 +22,9 @@
     <nav aria-label="주 메뉴">
       <ul>
         {{- $page := . }}
-        <li><a href="{{ "" | relLangURL }}"{{ if .IsHome }} aria-current="page"{{ end }}>홈</a></li>
+        <li><a class="nav-home" href="{{ "" | relLangURL }}" aria-label="홈"{{ if .IsHome }} aria-current="page"{{ end }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9v11h13V9"></path><path d="M10 20v-6h4v6"></path></svg>
+        </a></li>
         {{- range site.Menus.main }}
         {{- $on := or ($page.IsMenuCurrent "main" .) ($page.HasMenuCurrent "main" .) }}
         <li><a href="{{ .URL }}"{{ if $on }} aria-current="page"{{ end }}>{{ .Name }}</a></li>
