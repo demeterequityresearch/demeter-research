@@ -1,20 +1,14 @@
-{{- /* 리포트 한 줄: 날짜 · (회사) · 제목(리포트 헤드라인, 없으면 '코세스 기업 분석' 같은 이름) · 부제. 누르면 리포트 페이지.
-       쓰는 곳: 회사 페이지(withCompany=false, withType=true: 종류 표시). 리포트 목록(/reports/)은 2026-10-20부터 report-item.html */ -}}
+{{- /* 회사 페이지 리포트 한 줄 (2026-10-23 개편): 왼쪽 동그라미(작성처 로고: 우리 리포트는 'a.', 증권사 리포트는 증권사 첫 글자) ·
+       종류(기업 분석·주간 업데이트…) / 제목 / (데스크톱만 한 줄 요약) / 작성처 · 날짜 · 오른쪽 '›'(누르면 상세라는 표시).
+       줄 어디를 눌러도 이동(제목 링크를 줄 전체로 늘림). 리포트 목록(/reports/)은 report-item.html */ -}}
 {{- $p := .page }}
 <li class="row" data-type="{{ $p.Params.reportType }}">
-  <span class="r-date">{{ $p.Date.Format "2006-01-02" }}</span>
-  {{- if .withCompany }}
-  {{- with site.GetPage (printf "/companies/%s" $p.Params.code) }}
-  <a class="r-co" href="{{ .RelPermalink }}">{{ .Title }}<small>{{ .Params.code }}</small></a>
-  {{- else }}
-  <span class="r-co">{{ $p.Params.company }}</span>
-  {{- end }}
-  {{- end }}
+  <span class="r-av" aria-hidden="true">a<em>.</em></span>
   <span class="r-main">
-    {{- if or .withCompany .withType }}
     {{- range where site.Params.reportTypes "key" $p.Params.reportType }}<span class="r-type">{{ .name }}</span>{{ end }}
-    {{- end }}
     <a class="r-title" href="{{ $p.RelPermalink }}">{{ $p.Params.headline | default $p.Title }}</a>
     {{- with $p.Params.subhead }}<span class="r-sub">{{ . }}</span>{{ end }}
+    <span class="r-meta">Alpha Insight<i aria-hidden="true">·</i><span class="r-date">{{ $p.Date.Format "2006-01-02" }}</span></span>
   </span>
+  <svg class="r-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
 </li>

@@ -1439,27 +1439,28 @@ a.mono:hover {
     scroll-margin-top: calc(var(--nav-h, 64px) + 60px);
 }
 
-/* 기업 분석 최신판 카드 */
+/* 최신 리포트 카드(2026-10-23): 나머지 구역은 흰 카드라서, 이 카드만 브랜드 녹색 바탕으로 눌러 강조 */
 .bo-card {
     display: grid;
     gap: 6px;
     padding: 18px 18px 14px;
-    background: var(--surface);
-    border: 1px solid var(--rule);
+    color: var(--band-ink);
+    background: var(--band);
+    border: 1px solid var(--band);
     border-top: 3px solid var(--gold);
-    border-radius: 0 0 12px 12px;
+    border-radius: 14px;
 }
 
 .bo-label {
     font-size: 13px;
     font-weight: 600;
-    color: var(--green);
+    color: var(--gold);
 }
 
 .bo-label span {
     margin-left: 4px;
     font-weight: 400;
-    color: var(--muted);
+    color: color-mix(in srgb, var(--band-ink) 70%, transparent);
 }
 
 .bo-title {
@@ -1467,15 +1468,16 @@ a.mono:hover {
     font-size: 19px;
     font-weight: 700;
     line-height: 1.45;
+    color: #FFFFFF;
 }
 
 .bo-title:hover {
-    color: var(--gold-text);
+    color: var(--gold);
 }
 
 .bo-sub {
     font-size: 14.5px;
-    color: var(--muted);
+    color: color-mix(in srgb, var(--band-ink) 80%, transparent);
 }
 
 .bo-foot {
@@ -1486,15 +1488,35 @@ a.mono:hover {
     font-size: 14px;
 }
 
-.bo-foot a {
-    color: var(--gold-text);
+.bo-foot .r-date {
+    color: color-mix(in srgb, var(--band-ink) 70%, transparent);
 }
 
-/* 리포트 목록 (회사 페이지) */
+.bo-foot a {
+    color: var(--gold);
+}
+
+/* 흰 카드(2026-10-23): 회사 페이지의 구역(리포트·회사 정보·사업 구성·주요 재무정보·관련 기업) */
+.co-reports,
+.co-profile,
+.co-seg,
+.co-fin,
+.co-peers {
+    padding: 18px 18px 16px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+}
+
+.co-page .co-layout h2 {
+    margin: 0;
+}
+
+/* 리포트 목록 (회사 페이지, 2026-10-23): 동그라미 로고 | 종류 / 제목 / 작성처·날짜 | › */
 .co-reports .filters {
     flex-wrap: nowrap;
-    margin: 12px calc(-1 * var(--gutter-l)) 14px;
-    padding: 0 var(--gutter-l);
+    margin: 12px -18px 4px;
+    padding: 0 18px;
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -1504,22 +1526,85 @@ a.mono:hover {
     min-height: 38px;
 }
 
-.co-reports .row {
-    grid-template-columns: 1fr;
-    gap: 2px;
-    padding: 14px 2px;
+.co-reports .report-list {
+    border-top: 0;
 }
 
-.co-reports .r-date {
-    font-size: 12.5px;
+.co-reports .row {
+    position: relative;
+    grid-template-columns: 40px minmax(0, 1fr) 16px;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 0;
+}
+
+.co-reports .row:last-child {
+    border-bottom: 0;
+}
+
+.r-av {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-family: var(--font-mark);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1;
+    color: #EDE6D6;
+    background: #0E3B30;
+}
+
+.r-av em {
+    font-style: normal;
+    color: var(--gold);
+}
+
+.co-reports .r-main {
+    grid-column: 2;
+    gap: 3px;
 }
 
 .co-reports .r-title {
-    font-size: 17px;
+    font-size: 16.5px;
+}
+
+.co-reports .r-title::after {
+    content: "";
+    position: absolute;
+    inset: 0;                 /* 줄 어디를 눌러도 이동 */
 }
 
 .co-reports .r-sub {
     display: none;            /* 휴대폰은 제목만: 목록이 길어지지 않게 */
+}
+
+.r-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--muted);
+}
+
+.r-meta i {
+    font-style: normal;
+}
+
+.r-meta .r-date {
+    font-size: 12.5px;
+}
+
+.r-go {
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+}
+
+.row:hover .r-go {
+    color: var(--gold-text);
 }
 
 /* 회사 정보 */
@@ -1551,6 +1636,54 @@ a.mono:hover {
     color: var(--green);
     text-decoration: underline;
     text-underline-offset: 3px;
+}
+
+.co-facts .f-holders dd {
+    display: grid;
+    gap: 4px;
+}
+
+.h-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.h-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 10px;
+    align-items: baseline;
+}
+
+.h-pct {
+    font-family: var(--font-data);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.h-bar {
+    grid-column: 1 / -1;
+    height: 6px;
+    background: var(--chip);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.h-bar i {
+    display: block;
+    width: var(--w);
+    height: 100%;
+    background: var(--gold);
+}
+
+.h-sh {
+    grid-column: 1 / -1;
+    font-family: var(--font-data);
+    font-size: 12.5px;
+    color: var(--muted);
 }
 
 .co-page h2 small {
@@ -1719,6 +1852,14 @@ a.mono:hover {
         grid-column: 2;
     }
 
+    .co-reports,
+    .co-profile,
+    .co-seg,
+    .co-fin,
+    .co-peers {
+        padding: 22px 24px 20px;
+    }
+
     /* 리포트가 없는 종목(2026-10-21): 왼쪽 리포트 칸이 없으므로 같은 폭 2단으로 채움 */
     .co-layout.no-reports {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1735,9 +1876,14 @@ a.mono:hover {
     }
 
     .co-reports .row {
-        grid-template-columns: 7.2em 1fr;
-        gap: 20px;
-        padding: 16px 4px;
+        grid-template-columns: 44px minmax(0, 1fr) 16px;
+        gap: 16px;
+        padding: 16px 0;
+    }
+
+    .r-av {
+        width: 44px;
+        height: 44px;
     }
 
     .co-reports .r-sub {
@@ -2061,7 +2207,6 @@ a.mono:hover {
         border-left: 1px solid var(--rule);
     }
 
-    .co-holders,
     .co-fin {
         grid-column: 2;
     }

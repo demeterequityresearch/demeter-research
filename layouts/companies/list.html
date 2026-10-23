@@ -1,7 +1,7 @@
 {{- define "main" }}
-{{- /* /companies/<종목코드>/ : 회사 페이지 (로그인 없이 공개, 2026-10-20 사용자 문서 두 차례로 개편)
-         한 페이지(탭 없음): 머리(회사명·종목코드·시장) → 왼쪽 리포트 목록(거르기 버튼은 리포트 목록 페이지와 같음, 10건씩 더 보기)
-         오른쪽: 최신 리포트 카드(종류 상관없이 1건) → 회사 정보 → 주요주주 → 사업 구성 → 주요 재무정보 → 관련 기업
+{{- /* /companies/<종목코드>/ : 회사 페이지 (로그인 없이 공개, 2026-10-20 개편, 2026-10-23: 구역마다 흰 카드, 최신 리포트는 녹색 카드로 강조, 주요주주는 회사 정보 안으로)
+         한 페이지(탭 없음): 머리(회사명·종목코드·상장) → 왼쪽 리포트 목록(거르기 버튼은 리포트 목록 페이지와 같음, 10건씩 더 보기)
+         오른쪽: 최신 리포트 카드(종류 상관없이 1건) → 회사 정보(주요주주 포함) → 사업 구성 → 주요 재무정보 → 관련 기업
          머리의 종가, 머리 아래 주가 차트·시세 정보, 주요주주·주요 재무정보는 data/market/<코드>.json·static/market/<코드>.json
          (scripts/market.py가 매일 아침 KRX·DART에서 만듦). 파일이 없으면 그 칸을 감춤
          휴대폰은 최신 리포트 → 리포트 목록 → 회사 정보 순으로 쌓고, 데스크톱(861px 이상)은 2단
@@ -94,12 +94,7 @@
 
     <section class="co-reports" id="reports" aria-labelledby="reports-h">
       <h2 id="reports-h">리포트</h2>
-      <div class="filters" data-filters role="group" aria-label="리포트 종류">
-        <button type="button" data-f="all" aria-pressed="true">전체</button>
-        {{- range site.Params.reportTypes }}
-        <button type="button" data-f="{{ .key }}" aria-pressed="false">{{ .name }}</button>
-        {{- end }}
-      </div>
+      {{ partial "filters.html" (dict "hasExternal" (gt (len (where $reports "Params.reportType" "EXT")) 0)) }}
       <ul class="report-list" data-more="10">
         {{- range $reports }}{{ partial "report-row.html" (dict "page" . "withCompany" false "withType" true) }}{{ end }}
       </ul>
@@ -109,33 +104,31 @@
     {{- end }}
 
     {{- with $info }}
+    {{- /* 회사 정보(2026-10-23): 주요주주는 이 칸의 한 항목(업종·상장·대표이사·주요주주·본사·홈페이지). 결산월은 뺌 */ -}}
+    {{- $hold := cond (ne $mk nil) (index (default dict (index (default dict $mk) "holders")) "holders") nil }}
     <section class="co-profile" id="profile" aria-labelledby="profile-h">
       <h2 id="profile-h">회사 정보</h2>
       {{- with .definition }}<p class="co-def">{{ . }}</p>{{ end }}
       <dl class="co-facts">
         {{- with .industry }}<div><dt>업종</dt><dd>{{ . }}</dd></div>{{ end }}
-        {{- with .market }}<div><dt>시장</dt><dd>{{ . }}</dd></div>{{ end }}
+        {{- with .market }}<div><dt>상장</dt><dd>{{ . }}</dd></div>{{ end }}
         {{- with .ceo }}<div><dt>대표이사</dt><dd>{{ . }}</dd></div>{{ end }}
+        {{- with $hold }}
+        <div class="f-holders"><dt>주요주주</dt><dd>
+          <ul class="h-list">
+            {{- range . }}
+            <li><span class="h-name">{{ .name }}</span><span class="h-pct">{{ with .pct }}{{ lang.FormatNumber 2 . }}%{{ end }}</span>
+              <span class="h-bar" style="--w: {{ .pct }}%"><i></i></span>
+              <span class="h-sh">{{ with .shares }}{{ lang.FormatNumber 0 . }}주{{ end }}</span></li>
+            {{- end }}
+          </ul>
+          <p class="co-note">{{ with $mk.holders.asof }}{{ . }} 최대주주 현황·5% 이상 대량보유 보고 기준 (DART){{ end }}</p>
+        </dd></div>
+        {{- end }}
         {{- with .hq }}<div><dt>본사</dt><dd>{{ . }}</dd></div>{{ end }}
-        {{- with .fiscal_month }}<div><dt>결산월</dt><dd>{{ . }}월</dd></div>{{ end }}
         {{- with .homepage }}{{ $url := cond (hasPrefix . "http") . (printf "https://%s" .) }}<div><dt>홈페이지</dt><dd><a href="{{ $url }}" rel="noopener" target="_blank">{{ . }}</a></dd></div>{{ end }}
       </dl>
     </section>
-
-    {{- with $mk }}{{ with .holders }}{{ with .holders }}
-    <section class="co-holders" aria-labelledby="holders-h">
-      <h2 id="holders-h">주요주주</h2>
-      <div class="tbl-wrap">
-        <table class="mini-tbl">
-          <thead><tr><th>주주</th><th>보유주식수</th><th>지분율</th></tr></thead>
-          <tbody>
-            {{- range . }}<tr><td>{{ .name }}</td><td>{{ with .shares }}{{ lang.FormatNumber 0 . }}{{ end }}</td><td>{{ with .pct }}{{ lang.FormatNumber 2 . }}%{{ end }}</td></tr>{{ end }}
-          </tbody>
-        </table>
-      </div>
-      <p class="co-note">{{ with $mk.holders.asof }}{{ . }} 최대주주 현황 및 5% 이상 대량보유 보고 기준 (DART){{ end }}</p>
-    </section>
-    {{- end }}{{ end }}{{ end }}
 
     {{- with .segments }}
     <section class="co-seg" aria-labelledby="seg-h">
