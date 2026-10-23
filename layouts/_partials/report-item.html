@@ -1,6 +1,24 @@
 {{- /* 리포트 목록(/reports/) 한 줄, 카드형 (2026-10-20): 회사 첫 글자 배지 · 회사명·코드 / 종류 · 날짜 / 헤드라인 · 부제.
        회사 로고는 상표라 나중에 정하고, 지금은 첫 글자 배지(색은 종목코드 넷째·다섯째 자리로 세 가지 중 하나). 휴대폰은 부제를 감춤. 배지도 회사 페이지로 감(2026-10-21) */ -}}
-{{- $p := . }}
+{{- /* 받는 값: page(우리 리포트) 또는 ext + co(증권사 항목과 그 회사 페이지, 2026-10-23). 증권사 항목은 배지 = 증권사 첫 글자, 원문 링크가 새 탭에서 열리고 '인용' 표시 */ -}}
+{{- with .ext }}
+{{- $co := $.co }}
+<li class="item ext" data-type="EXT">
+  <span class="mono m{{ mod (len .broker) 3 }}" aria-hidden="true">{{ substr .broker 0 1 }}</span>
+  <span class="i-co"><a href="{{ $co.RelPermalink }}">{{ $co.Title }}</a><small>{{ $co.Params.code }}</small></span>
+  <span class="i-body">
+    <span class="i-top">
+      <span class="i-tag">증권사 리포트 · 인용</span>
+      <span class="i-date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{ .date }}</span>
+    </span>
+    <a class="i-title" href="{{ .url }}" target="_blank" rel="noopener noreferrer nofollow">{{ .title }} <span aria-hidden="true">↗</span></a>
+    {{- with .summary }}<span class="i-sub">{{ . }}</span>{{ end }}
+    {{- if or .opinion .target_price }}<span class="r-op">증권사 의견{{ with .opinion }} {{ . }}{{ end }}{{ with .target_price }}{{ if $.ext.opinion }} ·{{ end }} 목표주가 {{ lang.FormatNumber 0 . }}원{{ end }}</span>{{ end }}
+    <span class="r-meta">{{ .broker }}</span>
+  </span>
+</li>
+{{- else }}
+{{- $p := .page }}
 {{- $co := site.GetPage (printf "/companies/%s" $p.Params.code) }}
 <li class="item" data-type="{{ $p.Params.reportType }}">
   {{- $m := printf "mono m%d" (mod (add (int (substr $p.Params.code 3 1)) (int (substr $p.Params.code 4 1))) 3) }}
@@ -19,3 +37,4 @@
     {{- with $p.Params.subhead }}<span class="i-sub">{{ . }}</span>{{ end }}
   </span>
 </li>
+{{- end }}

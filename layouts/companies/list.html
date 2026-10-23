@@ -13,6 +13,12 @@
 {{- $info := index site.Data.companies $code }}
 {{- if not $info }}{{ range where (site.Data.universe.companies | default slice) "code" $code }}{{ $info = . }}{{ end }}{{ end }}
 {{- $reports := (where (where site.RegularPages "Section" "reports") "Params.code" $code).ByDate.Reverse }}
+{{- /* 증권사 리포트(data/external/<코드>.json, publish.py가 씀): 우리 리포트와 한 목록에 날짜 내림차순으로 섞음.
+       정렬 키 = 정렬 날짜 + 구분(우리 1, 증권사 0): 같은 날이면 우리 리포트가 위, 증권사 항목의 정렬 날짜는 최신 WU 날짜를 넘지 않음 */ -}}
+{{- $ext := slice }}{{ with index site.Data.external $code }}{{ $ext = .items | default slice }}{{ end }}
+{{- $feed := slice }}
+{{- range $reports }}{{ $feed = $feed | append (dict "key" (printf "%s-1" (.Date.Format "2006-01-02")) "page" .) }}{{ end }}
+{{- range $ext }}{{ $feed = $feed | append (dict "key" (printf "%s-0" (.sort | default .date)) "ext" .) }}{{ end }}
 {{- $mk := index site.Data.market $code }}
 {{- $px := cond (ne $mk nil) (index (default dict $mk) "price") nil }}
 <div class="view co-page" data-filter-scope>
@@ -94,12 +100,13 @@
 
     <section class="co-reports" id="reports" aria-labelledby="reports-h">
       <h2 id="reports-h">리포트</h2>
-      {{ partial "filters.html" (dict "hasExternal" (gt (len (where $reports "Params.reportType" "EXT")) 0)) }}
+      {{ partial "filters.html" (dict "hasExternal" (gt (len $ext) 0)) }}
       <ul class="report-list" data-more="10">
-        {{- range $reports }}{{ partial "report-row.html" (dict "page" . "withCompany" false "withType" true) }}{{ end }}
+        {{- range sort $feed "key" "desc" }}{{ partial "report-row.html" . }}{{ end }}
       </ul>
       <button type="button" class="more-btn" data-more-btn hidden>더 보기</button>
       <p class="co-empty" data-empty hidden>이 종류의 리포트는 아직 발간되지 않았습니다.</p>
+      {{- if $ext }}<p class="co-note">증권사 리포트는 각 증권사가 발간한 자료를 Alpha Insight가 인용·요약해 소개하는 것이며, 원문은 링크에서 볼 수 있습니다. 저작권은 해당 증권사에 있습니다. 투자 권유가 아닙니다.</p>{{ end }}
     </section>
     {{- end }}
 

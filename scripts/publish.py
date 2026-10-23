@@ -112,6 +112,39 @@ def export_profile(code, prof):
     print(f"[회사 정보] data/companies/{code}.json")
 
 
+def export_external(name, code, wu_date=None):
+    """증권사 리포트(인용·요약 + 원문 링크, 2026-10-23): 리포트 쪽 <종목>/external_reports.json(WU 작성 때 정리)을
+    data/external/<종목코드>.json에 옮김. 화면은 이 파일만 읽음(WU 리포트는 읽지 않음).
+    항목 = {date, broker, title, summary, url, target_price?, opinion?}, 파일 = {"checked": 'YYYY-MM-DD', "items": [...]}.
+    - 날짜·증권사·제목·http(s) 링크가 없는 항목은 뺌(원문 링크가 없으면 게시하지 않는 규칙)
+    - sort = min(항목 날짜, 그 종목 최신 WU 날짜): 목록에서 우리 WU가 항상 맨 위에 오게 하는 정렬용(화면에는 실제 날짜)
+    - wu_date(WU를 올리는 중이면 그 날짜)와 checked가 다르면 경고만 함(누락 점검, 게시는 막지 않음)"""
+    src = STOCK / "_data" / "companies" / f"{code}_{name}" / "external_reports.json"
+    if not src.is_file():
+        if wu_date:
+            print(f"[경고] {name}({code}): external_reports.json 없음: 이번 WU의 증권사 리포트 정리가 빠졌는지 확인")
+        return
+    raw = json.loads(src.read_text(encoding="utf-8"))
+    if wu_date and raw.get("checked") != wu_date:
+        print(f"[경고] {name}({code}): 증권사 리포트 확인일(checked={raw.get('checked')})이 이번 WU({wu_date})와 다름: 정리가 빠졌는지 확인")
+    wus = [parse(f.stem)[1]["date"] for f in DEST.glob(f"*_{code}_WU*.json") if parse(f.stem)]
+    cap = max(wus) if wus else None
+    items = []
+    for it in raw.get("items") or []:
+        if not (it.get("date") and it.get("broker") and it.get("title") and str(it.get("url", "")).startswith(("http://", "https://"))):
+            print(f"[증권사] {name}: 필수 항목(날짜·증권사·제목·링크)이 없어 뺌: {it.get('title') or it.get('broker')}")
+            continue
+        d = it["date"]
+        out = {k: it[k] for k in ("date", "broker", "title", "summary", "url", "target_price", "opinion") if it.get(k) is not None}
+        out["sort"] = min(d, cap) if cap else d
+        items.append(out)
+    items.sort(key=lambda x: x["date"], reverse=True)
+    dest = SITE / "data" / "external" / f"{code}.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps({"checked": raw.get("checked"), "items": items}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[증권사] data/external/{code}.json ({len(items)}건)")
+
+
 def candidates(name, code, prof, types):
     """최종본마다 (원본 PDF, 웹사이트용 표준 파일명(확장자 없음), 원본 경로) — PDF가 없으면 원본 PDF는 None."""
     for agent, entry in (prof.get("latest_reports") or {}).items():
@@ -146,6 +179,7 @@ def main():
         for name, code, prof in companies():
             if code in published:
                 export_profile(code, prof)
+                export_external(name, code)
         return
 
     targets = [c for c in companies() if a.all or a.list or a.company in (c[0], c[1])]
@@ -177,6 +211,8 @@ def main():
             print(f"[목록] reports/{entry.name}" + (f"  제목: {h}" if h else "  (제목을 찾지 못함: 기본 이름으로 표시)"))
             prune(code, meta["reportType"])
             export_profile(code, prof)
+            wu = meta["date"] if meta["reportType"] == "WU" else None
+            export_external(name, code, wu)
             published = True
     if published:
         supa.try_sync("리포트 목록", sync_db)
