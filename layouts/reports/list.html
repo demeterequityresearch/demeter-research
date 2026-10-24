@@ -9,7 +9,7 @@
 {{- range $code, $d := site.Data.external }}
 {{- with site.GetPage (printf "/companies/%s" $code) }}
 {{- $co := . }}
-{{- range $d.items }}{{ $hasExt = true }}{{ $feed = $feed | append (dict "key" (printf "%s-0" (.sort | default .date)) "ext" . "co" $co) }}{{ end }}
+{{- range $i, $e := $d.items }}{{ $hasExt = true }}{{ $feed = $feed | append (dict "key" (printf "%s-0" ($e.sort | default $e.date)) "ext" $e "co" $co "href" (printf "/reports/%s-%s-ext-%d/" (replace $e.date "-" "") $code (add $i 1) | relURL)) }}{{ end }}
 {{- end }}
 {{- end }}
 <div class="view" data-filter-scope>

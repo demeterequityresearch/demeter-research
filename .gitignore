@@ -2,6 +2,7 @@ public/
 resources/
 content/reports/
 content/companies/
+content/extreports/
 .hugo_build.lock
 .claude/
 

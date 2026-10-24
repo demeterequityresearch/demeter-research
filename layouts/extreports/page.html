@@ -1,0 +1,26 @@
+{{- define "main" }}
+{{- /* 증권사 리포트 상세 (2026-10-24): 우리 리포트 상세(layouts/reports/page.html)와 같은 머리·배치. PDF 자리에 인용·요약을 보여 주고,
+       원문은 링크 글자로만 붙임(PDF를 받아 두거나 띄우지 않음). 페이지 원본은 scripts/convert.py가 data/external/<코드>.json에서 만듦 */ -}}
+{{- $co := site.GetPage (printf "/companies/%s" .Params.code) }}
+<article class="view report-page ext-page">
+  <p class="crumb">
+    <a href="{{ "" | relLangURL }}">홈</a> /
+    {{- with $co }} <a href="{{ .RelPermalink }}">{{ .Title }}</a> /{{ end }}
+    {{- if $co }} <a href="{{ $co.RelPermalink }}?type=EXT#reports">증권사 리포트 · 인용</a>{{ else }} 증권사 리포트 · 인용{{ end }}
+  </p>
+  <header class="page-head">
+    <p class="eyebrow">증권사 리포트 · 인용</p>
+    <h1>{{ .Title }}</h1>
+    <p class="report-sub">{{ .Params.broker }}</p>
+    <p class="r-date">{{ .Date.Format "2006-01-02" }}</p>
+  </header>
+  <section class="ext-body">
+    {{- if or .Params.opinion .Params.target_price }}<p class="r-op">증권사 의견{{ with .Params.opinion }} {{ . }}{{ end }}{{ with .Params.target_price }}{{ if $.Params.opinion }} ·{{ end }} 목표주가 {{ lang.FormatNumber 0 . }}원{{ end }}</p>{{ end }}
+    <p class="ext-summary">{{ .Params.summary }}</p>
+    {{- with .Params.source_url }}
+    <p class="ext-src">원문: <a href="{{ . }}" target="_blank" rel="noopener noreferrer nofollow">{{ . }}</a> <span aria-hidden="true">↗</span> <small>(외부 사이트, 새 창)</small></p>
+    {{- end }}
+    <p class="ext-note">{{ .Params.broker }}가 발간한 자료를 Alpha Insight가 요약·인용해 소개하는 것이며, 저작권은 해당 증권사에 있습니다. 위 의견과 목표주가는 제3자 의견으로 Demeter의 의견이 아니며, 투자 권유가 아닙니다.</p>
+  </section>
+</article>
+{{- end }}

@@ -16,6 +16,8 @@ import json, pathlib, re, shutil
 SRC = pathlib.Path("reports")
 DST = pathlib.Path("content/reports")
 COMPANIES = pathlib.Path("content/companies")
+EXT_DST = pathlib.Path("content/extreports")
+EXTERNAL = pathlib.Path("data/external")
 UNIVERSE = pathlib.Path("data/universe.json")
 
 # 사이트에 보이는 이름 (약자 BO/WU/QR는 화면에 쓰지 않음). 회사 페이지의 칸 이름·설명은 hugo.toml의 params.reportTypes
@@ -83,6 +85,24 @@ def main():
         (DST / slug / "index.md").write_text(front, encoding="utf-8")
         companies[meta["code"]] = meta["company"]  # 날짜순이라 가장 늦은 리포트의 회사명이 남음
         print(f"converted: {slug}  <-  {f.name}")
+
+    # 증권사 리포트 상세 페이지(2026-10-24): data/external/<코드>.json의 항목마다 /reports/<날짜>-<코드>-ext-<n>/ (n = 파일 안 순번).
+    # 섹션은 extreports(우리 리포트 목록·집계에 섞이지 않게), 주소만 url로 /reports/ 아래. 원문 PDF는 받아 두지 않고 링크만
+    shutil.rmtree(EXT_DST, ignore_errors=True)
+    EXT_DST.mkdir(parents=True)
+    (EXT_DST / "_index.md").write_text('---\ntitle: "증권사 리포트"\nbuild:\n  render: never\n  list: never\n---\n', encoding="utf-8")
+    for f in sorted(EXTERNAL.glob("*.json")):
+        code = f.stem
+        for n, it in enumerate(json.loads(f.read_text(encoding="utf-8")).get("items", []), 1):
+            slug = f'{it["date"].replace("-", "")}-{code}-ext-{n}'
+            meta = {"title": it["title"], "url": f"/reports/{slug}/", "code": code, "broker": it["broker"],
+                    "source_url": it.get("url", ""), "summary": it.get("summary", ""), "summary_short": it.get("summary_short", ""),
+                    "opinion": it.get("opinion", ""), "target_price": it.get("target_price") or 0,
+                    "sitemap": {"disable": True}, "robotsNoIndex": True}
+            front = "---\n" + f"date: {it['date']}\n" + "".join(f"{k}: {json.dumps(v, ensure_ascii=False)}\n" for k, v in meta.items()) + "---\n"
+            (EXT_DST / slug).mkdir()
+            (EXT_DST / slug / "index.md").write_text(front, encoding="utf-8")
+            print(f"external: {slug}")
 
     # 회사 페이지: 종목코드마다 하나. 리포트가 없는 종목은 data/universe.json에서
     with_reports = set(companies)

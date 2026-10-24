@@ -18,7 +18,7 @@
 {{- $ext := slice }}{{ with index site.Data.external $code }}{{ $ext = .items | default slice }}{{ end }}
 {{- $feed := slice }}
 {{- range $reports }}{{ $feed = $feed | append (dict "key" (printf "%s-1" (.Date.Format "2006-01-02")) "page" .) }}{{ end }}
-{{- range $ext }}{{ $feed = $feed | append (dict "key" (printf "%s-0" (.sort | default .date)) "ext" .) }}{{ end }}
+{{- range $i, $e := $ext }}{{ $feed = $feed | append (dict "key" (printf "%s-0" ($e.sort | default $e.date)) "ext" $e "href" (printf "/reports/%s-%s-ext-%d/" (replace $e.date "-" "") $code (add $i 1) | relURL)) }}{{ end }}
 {{- $mk := index site.Data.market $code }}
 {{- $px := cond (ne $mk nil) (index (default dict $mk) "price") nil }}
 <div class="view co-page" data-filter-scope>

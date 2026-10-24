@@ -1,6 +1,6 @@
 {{- /* 회사 페이지 리포트 한 줄 (2026-10-23 개편): 왼쪽 동그라미(작성처 로고: 우리 리포트는 'a.', 증권사 리포트는 증권사 첫 글자) ·
        종류(기업 분석·주간 업데이트… / 증권사 리포트 · 인용) / 제목 / (데스크톱만 한 줄 요약) / 작성처 · 날짜 · 오른쪽 아이콘.
-       우리 리포트: '›' 아이콘, 줄 어디를 눌러도 리포트 페이지로. 증권사 리포트(.ext): '↗' 아이콘, 원문 링크가 새 탭에서 열림
+       우리 리포트: '›' 아이콘, 줄 어디를 눌러도 리포트 페이지로. 증권사 리포트(.ext): '›' 아이콘, 제목은 사이트 안 상세 페이지(layouts/extreports/page.html)로. 받는 값에 href 포함
        (인용·요약임을 줄마다 표시, 목표주가·투자의견은 있으면 '증권사 의견'으로 표시).
        받는 값: page(우리 리포트) 또는 ext(증권사 항목 data/external/<코드>.json). 리포트 목록(/reports/)은 report-item.html */ -}}
 {{- with .page }}
@@ -21,12 +21,12 @@
   <span class="r-av m{{ mod (len .broker) 3 }}" aria-hidden="true">{{ substr .broker 0 1 }}</span>
   <span class="r-main">
     <span class="r-type">증권사 리포트 · 인용</span>
-    <a class="r-title" href="{{ .url }}" target="_blank" rel="noopener noreferrer nofollow">{{ .title }}</a>
-    {{- with .summary }}<span class="r-sub">{{ . }}</span>{{ end }}
+    <a class="r-title" href="{{ $.href }}">{{ .title }}</a>
+    {{- with (.summary_short | default (index (split (.summary | default "") ". ") 0 | truncate 70)) }}<span class="r-sub">{{ . }}</span>{{ end }}
     {{- if or .opinion .target_price }}<span class="r-op">증권사 의견{{ with .opinion }} {{ . }}{{ end }}{{ with .target_price }}{{ if $.ext.opinion }} ·{{ end }} 목표주가 {{ lang.FormatNumber 0 . }}원{{ end }}</span>{{ end }}
     <span class="r-meta">{{ .broker }}<i aria-hidden="true">·</i><span class="r-date">{{ .date }}</span></span>
   </span>
-  <svg class="r-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M8 7h9v9"></path></svg>
+  <svg class="r-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
 </li>
 {{- end }}
 {{- end }}
