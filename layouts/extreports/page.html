@@ -15,7 +15,13 @@
     <p class="r-date">{{ .Date.Format "2006-01-02" }}</p>
   </header>
   <section class="ext-body">
-    {{- if or .Params.opinion .Params.target_price }}<p class="r-op">증권사 의견{{ with .Params.opinion }} {{ . }}{{ end }}{{ with .Params.target_price }}{{ if $.Params.opinion }} ·{{ end }} 목표주가 {{ lang.FormatNumber 0 . }}원{{ end }}</p>{{ end }}
+    {{- if or .Params.opinion .Params.target_price }}
+    <div class="ext-op">
+      <span class="ext-op-label">증권사 의견 · 목표주가</span>
+      <p class="r-op">{{ with .Params.opinion }}투자의견 {{ . }}{{ end }}{{ with .Params.target_price }}{{ if $.Params.opinion }} · {{ end }}목표주가 {{ lang.FormatNumber 0 . }}원{{ end }}</p>
+      <small>{{ .Params.broker }}의 의견이며 Demeter의 의견이 아닙니다.</small>
+    </div>
+    {{- end }}
     <p class="ext-summary">{{ .Params.summary }}</p>
     {{- with .Params.source_url }}
     <p class="ext-src">원문: <a href="{{ . }}" target="_blank" rel="noopener noreferrer nofollow">{{ . }}</a> <span aria-hidden="true">↗</span> <small>(외부 사이트, 새 창)</small></p>

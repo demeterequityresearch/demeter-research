@@ -13,7 +13,6 @@
     </span>
     <a class="i-title" href="{{ $.href }}">{{ .title }}</a>
     {{- with (.summary_short | default (index (split (.summary | default "") ". ") 0 | truncate 70)) }}<span class="i-sub">{{ . }}</span>{{ end }}
-    {{- if or .opinion .target_price }}<span class="r-op">증권사 의견{{ with .opinion }} {{ . }}{{ end }}{{ with .target_price }}{{ if $.ext.opinion }} ·{{ end }} 목표주가 {{ lang.FormatNumber 0 . }}원{{ end }}</span>{{ end }}
     <span class="r-meta">{{ .broker }}</span>
   </span>
 </li>

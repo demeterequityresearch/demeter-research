@@ -115,7 +115,7 @@ def export_profile(code, prof):
 def export_external(name, code, wu_date=None):
     """증권사 리포트(인용·요약 + 원문 링크, 2026-10-23): 리포트 쪽 <종목>/external_reports.json(WU 작성 때 정리)을
     data/external/<종목코드>.json에 옮김. 화면은 이 파일만 읽음(WU 리포트는 읽지 않음).
-    항목 = {date, broker, title, summary, url, target_price?, opinion?}, 파일 = {"checked": 'YYYY-MM-DD', "items": [...]}.
+    항목 = {date, broker, title, summary, summary_short(목록 한 줄), url, target_price?, opinion?}, 파일 = {"checked": 'YYYY-MM-DD', "items": [...]}.
     - 날짜·증권사·제목·http(s) 링크가 없는 항목은 뺌(원문 링크가 없으면 게시하지 않는 규칙)
     - sort = min(항목 날짜, 그 종목 최신 WU 날짜): 목록에서 우리 WU가 항상 맨 위에 오게 하는 정렬용(화면에는 실제 날짜)
     - wu_date(WU를 올리는 중이면 그 날짜)와 checked가 다르면 경고만 함(누락 점검, 게시는 막지 않음)"""
@@ -135,7 +135,7 @@ def export_external(name, code, wu_date=None):
             print(f"[증권사] {name}: 필수 항목(날짜·증권사·제목·링크)이 없어 뺌: {it.get('title') or it.get('broker')}")
             continue
         d = it["date"]
-        out = {k: it[k] for k in ("date", "broker", "title", "summary", "url", "target_price", "opinion") if it.get(k) is not None}
+        out = {k: it[k] for k in ("date", "broker", "title", "summary", "summary_short", "url", "target_price", "opinion") if it.get(k) is not None}
         out["sort"] = min(d, cap) if cap else d
         items.append(out)
     items.sort(key=lambda x: x["date"], reverse=True)

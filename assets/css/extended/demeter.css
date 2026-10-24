@@ -2284,3 +2284,24 @@ a.mono:hover {
     opacity: .7;
     line-height: 1.6;
 }
+.ext-op {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--gold-text);
+    background: rgba(182, 140, 81, .08);
+    border-radius: 0 8px 8px 0;
+}
+.ext-op-label {
+    display: block;
+    font-size: .75rem;
+    letter-spacing: .04em;
+    opacity: .7;
+}
+.ext-op .r-op {
+    font-size: 1.15rem;
+    margin: 4px 0;
+}
+.ext-op small {
+    font-size: .8rem;
+    opacity: .75;
+}
