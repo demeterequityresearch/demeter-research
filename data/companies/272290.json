@@ -1,0 +1,57 @@
+{
+  "market": "KOSDAQ",
+  "corp_code": "01237540",
+  "ceo": "장경호, 강정태 (각자 대표이사)",
+  "hq": "충청남도 아산시 둔포면 아산밸리로 171",
+  "homepage": "www.innoxamc.com",
+  "fiscal_month": "12",
+  "industry": "디스플레이·전자 소재 (OLED 공정·봉지 필름, FPCB 회로기판 소재, 반도체 패키지 테이프)",
+  "definition": "고분자 합성·배합 기술로 OLED 패널 공정·봉지 필름(INNOLED), FPCB용 FCCL·커버레이·본딩시트(SMARTFLEX), 반도체 패키지 테이프(DAF·LOC 등, INNOSEM)를 패널·FPCB·반도체 업체에 공급. 2026년부터 이녹스리튬(지분 59.8%)이 배터리용 수산화리튬 판매",
+  "secondary": [
+    "고순도 수산화리튬 (종속기업 이녹스리튬, 2025.11 준공, 2026.04 첫 매출)"
+  ],
+  "segments": [
+    {
+      "name": "디스플레이 OLED 소재 (INNOLED)",
+      "share": 66.3,
+      "basis": "2025 매출 (1H26 63.0%)"
+    },
+    {
+      "name": "회로기판 소재 (SMARTFLEX)",
+      "share": 25.4,
+      "basis": "2025 매출 (1H26 20.6%)"
+    },
+    {
+      "name": "반도체 패키지 소재 (INNOSEM)",
+      "share": 8.3,
+      "basis": "2025 매출 (1H26 9.3%)"
+    },
+    {
+      "name": "이차전지 소재 (이녹스리튬, 수산화리튬)",
+      "share": 7.2,
+      "basis": "1H26 매출 146억원, 부문 영업손실 59억원 (반기보고서 주석 32)"
+    }
+  ],
+  "peers": [
+    {
+      "name": "덕산네오룩스",
+      "code": "213420",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "동진쎄미켐",
+      "code": "005290",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "덕산하이메탈",
+      "code": "077360",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "엠케이전자",
+      "code": "033160",
+      "market": "KOSDAQ"
+    }
+  ]
+}
