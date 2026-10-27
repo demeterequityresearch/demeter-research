@@ -1,0 +1,69 @@
+{
+  "market": "KOSPI",
+  "corp_code": "00101488",
+  "ceo": null,
+  "hq": null,
+  "homepage": null,
+  "fiscal_month": "12",
+  "industry": "보일러·온수기 (콘덴싱 가스보일러, 북미 콘덴싱 탱크리스 온수기) → HVAC 확장",
+  "definition": "가스·전기로 물을 데워 난방·온수를 공급하는 콘덴싱 기기를 본사에서 설계·제조하고 해외 판매법인(Navien Inc. 등)이 유통. 매출의 약 70%가 해외, 북미가 57~62%. 관세·환율·북미 유통 재고와 가격 인상, 국내 신축·교체 수요가 실적을 좌우",
+  "secondary": [
+    "환기청정·주방가전·구독 케어",
+    "스마트홈(코맥스)",
+    "히트펌프·하이드로 퍼니스(북미)"
+  ],
+  "segments": [
+    {
+      "name": "온수기",
+      "share": 44,
+      "basis": null
+    },
+    {
+      "name": "가정용 보일러",
+      "share": 39,
+      "basis": null
+    },
+    {
+      "name": "기타 제품·상품 (환기청정, 주방기기, 구독 등)",
+      "share": 17,
+      "basis": null
+    }
+  ],
+  "peers": [
+    {
+      "name": "코웨이",
+      "code": "021240",
+      "market": "KOSPI"
+    },
+    {
+      "name": "쿠쿠홀딩스",
+      "code": "192400",
+      "market": "KOSPI"
+    },
+    {
+      "name": "위닉스",
+      "code": "044340",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "파세코",
+      "code": "037070",
+      "market": "KOSDAQ"
+    },
+    {
+      "name": "신일전자",
+      "code": "002700",
+      "market": "KOSPI"
+    },
+    {
+      "name": "귀뚜라미홀딩스 (비상장)",
+      "code": "",
+      "market": "비상장"
+    },
+    {
+      "name": "A. O. Smith (미국), Rinnai (일본)",
+      "code": "",
+      "market": "해외"
+    }
+  ]
+}
